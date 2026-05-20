@@ -1,11 +1,27 @@
 """PyTorch dataset and transform builder for froth images."""
 import os
+import random
 from typing import List, Tuple
 
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
 import torchvision.transforms as T
+import torchvision.transforms.functional as TF
+
+
+class RandomRotate90(torch.nn.Module):
+    """Randomly rotate the image by exactly 0, 90, 180, or 270 degrees.
+
+    No black corners because axis-aligned 90-degree rotations always produce
+    a fully-filled rectangle.  Each call independently picks one of the four
+    angles with equal probability, so over many epochs the model sees up to
+    4x the effective variety per image.
+    """
+
+    def forward(self, img):
+        angle = random.choice([0, 90, 180, 270])
+        return TF.rotate(img, angle)
 
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"}
@@ -85,8 +101,7 @@ def build_transform(prep_cfg: dict, augment: bool = False) -> T.Compose:
             steps.append(T.RandomVerticalFlip(p=float(aug["v_flip"].get("p", 0.5))))
 
         if aug.get("rotation", {}).get("enabled", False):
-            deg = float(aug["rotation"].get("degrees", 15))
-            steps.append(T.RandomRotation(degrees=deg))
+            steps.append(RandomRotate90())
 
         if aug.get("color_jitter", {}).get("enabled", False):
             cj = aug["color_jitter"]

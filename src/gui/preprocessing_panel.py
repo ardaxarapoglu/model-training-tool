@@ -173,7 +173,7 @@ class PreprocessingPanel(QWidget):
         aug_v.addWidget(_section_label("Flips & Rotation"))
         self.aug_hflip = AugmentRow("Horizontal Flip", [("p:", 0.5, 0.0, 1.0, 0.05, 2)])
         self.aug_vflip = AugmentRow("Vertical Flip",   [("p:", 0.5, 0.0, 1.0, 0.05, 2)])
-        self.aug_rot   = AugmentRow("Random Rotation",  [("degrees:", 15, 0, 180, 1, 0)])
+        self.aug_rot   = AugmentRow("Random Rotation 0/90/180/270")
         self.aug_hflip.chk.setChecked(True)
         aug_v.addWidget(self.aug_hflip)
         aug_v.addWidget(self.aug_vflip)
@@ -238,7 +238,7 @@ class PreprocessingPanel(QWidget):
             "augmentation": {
                 "h_flip": {"enabled": self.aug_hflip.is_enabled(), "p": self.aug_hflip.values()[0]},
                 "v_flip": {"enabled": self.aug_vflip.is_enabled(), "p": self.aug_vflip.values()[0]},
-                "rotation": {"enabled": self.aug_rot.is_enabled(), "degrees": self.aug_rot.values()[0]},
+                "rotation": {"enabled": self.aug_rot.is_enabled()},
                 "color_jitter": {
                     "enabled": self.aug_cj.is_enabled(),
                     "brightness": self.aug_cj.values()[0],
@@ -281,7 +281,7 @@ class PreprocessingPanel(QWidget):
         aug = cfg.get("augmentation", {})
         _set_aug(self.aug_hflip, aug.get("h_flip", {}), ["p"])
         _set_aug(self.aug_vflip, aug.get("v_flip", {}), ["p"])
-        _set_aug(self.aug_rot,   aug.get("rotation", {}), ["degrees"])
+        self.aug_rot.chk.setChecked(aug.get("rotation", {}).get("enabled", False))
         cj = aug.get("color_jitter", {})
         self.aug_cj.chk.setChecked(cj.get("enabled", False))
         for sp, key in zip(self.aug_cj.spins, ["brightness", "contrast", "saturation", "hue"]):

@@ -25,7 +25,7 @@ def default_config() -> dict:
             "augmentation": {
                 "h_flip": {"enabled": True, "p": 0.5},
                 "v_flip": {"enabled": False, "p": 0.5},
-                "rotation": {"enabled": True, "degrees": 15},
+                "rotation": {"enabled": True},
                 "color_jitter": {
                     "enabled": True,
                     "brightness": 0.2,
