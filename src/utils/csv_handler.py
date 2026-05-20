@@ -12,15 +12,7 @@ def export_labels(experiments: list, output_path: str) -> int:
     with open(output_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(
             f,
-            fieldnames=[
-                "image_path",
-                "experiment",
-                "time_frame",
-                "time_interval",
-                "pb_concentration",
-                "pb_distribution",
-                "split",
-            ],
+            fieldnames=["image_path", "experiment", "time_frame", "pb_concentration", "split"],
         )
         writer.writeheader()
         writer.writerows(rows)
@@ -37,8 +29,6 @@ def _build_rows(experiments: list) -> list:
             if not folder or not os.path.isdir(folder):
                 continue
             pb = tf.get("pb_concentration", 0.0)
-            pb_dist = tf.get("pb_distribution", 0.0)
-            interval = tf.get("time_interval", "")
             for fname in sorted(os.listdir(folder)):
                 if os.path.splitext(fname)[1].lower() in IMAGE_EXTS:
                     rows.append(
@@ -46,9 +36,7 @@ def _build_rows(experiments: list) -> list:
                             "image_path": os.path.join(folder, fname),
                             "experiment": exp_id,
                             "time_frame": tf.get("name", ""),
-                            "time_interval": interval,
                             "pb_concentration": pb,
-                            "pb_distribution": pb_dist,
                             "split": split,
                         }
                     )
