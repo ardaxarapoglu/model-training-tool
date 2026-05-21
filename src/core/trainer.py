@@ -90,6 +90,12 @@ class TrainingWorker(QThread):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         n_params = count_trainable_params(model)
+
+        if device.type == "cuda":
+            torch.backends.cudnn.benchmark = True  # speeds up fixed-size inputs
+            gpu_name = torch.cuda.get_device_name(0)
+            gpu_mem  = torch.cuda.get_device_properties(0).total_memory / 1024**3
+            self.log.emit(f"[{self.run_id}] GPU: {gpu_name} ({gpu_mem:.1f} GB VRAM)")
         self.log.emit(f"[{self.run_id}] Device: {device} | Trainable params: {n_params:,}")
 
         if is_cls:
@@ -118,10 +124,23 @@ class TrainingWorker(QThread):
         test_ds = FrothDataset(test_samples, eval_tf) if test_samples else None
         val_ds = FrothDataset(val_samples, eval_tf) if val_samples else None
 
-        train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-        test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers) if test_ds else None
+        pin_mem = device.type == "cuda"
+        use_amp = t_cfg.get("use_amp", False) and device.type == "cuda"
+        if use_amp:
+            self.log.emit(f"[{self.run_id}] Automatic Mixed Precision (AMP) enabled — float16 forward pass")
+
+        train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
+                                  num_workers=num_workers, pin_memory=pin_mem,
+                                  persistent_workers=(num_workers > 0))
+        test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False,
+                                 num_workers=num_workers, pin_memory=pin_mem,
+                                 persistent_workers=(num_workers > 0)) if test_ds else None
         # val_loader is never used during training loop
-        val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers) if val_ds else None
+        val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False,
+                                num_workers=num_workers, pin_memory=pin_mem,
+                                persistent_workers=(num_workers > 0)) if val_ds else None
+
+        scaler = torch.cuda.amp.GradScaler() if use_amp else None
 
         # Loss
         if is_cls:
@@ -180,7 +199,7 @@ class TrainingWorker(QThread):
                 self.log.emit(f"[{self.run_id}] Stopped by user at epoch {epoch}.")
                 break
 
-            train_loss = _train_fn(model, train_loader, optimizer, criterion, device)
+            train_loss = _train_fn(model, train_loader, optimizer, criterion, device, scaler)
             train_history.append(train_loss)
 
             monitor_val = train_loss
@@ -310,16 +329,24 @@ class TrainingWorker(QThread):
 
 # ---------------------------------------------------------------------------
 
-def _train_epoch_reg(model, loader, optimizer, criterion, device):
+def _train_epoch_reg(model, loader, optimizer, criterion, device, scaler=None):
     model.train()
     total_loss = 0.0
     for imgs, labels in loader:
-        imgs, labels = imgs.to(device), labels.to(device).unsqueeze(1)
+        imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True).unsqueeze(1)
         optimizer.zero_grad()
-        preds = model(imgs)
-        loss = criterion(preds, labels)
-        loss.backward()
-        optimizer.step()
+        if scaler is not None:
+            with torch.cuda.amp.autocast():
+                preds = model(imgs)
+                loss = criterion(preds, labels)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            preds = model(imgs)
+            loss = criterion(preds, labels)
+            loss.backward()
+            optimizer.step()
         total_loss += loss.item() * len(imgs)
     return total_loss / len(loader.dataset)
 
@@ -330,7 +357,7 @@ def _eval_epoch_reg(model, loader, criterion, device, _num_outputs=1):
     total_loss = 0.0
     with torch.no_grad():
         for imgs, labels in loader:
-            imgs, labels = imgs.to(device), labels.to(device).unsqueeze(1)
+            imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True).unsqueeze(1)
             preds = model(imgs)
             loss = criterion(preds, labels)
             total_loss += loss.item() * len(imgs)
@@ -356,16 +383,24 @@ def _eval_epoch_reg(model, loader, criterion, device, _num_outputs=1):
     }
 
 
-def _train_epoch_cls(model, loader, optimizer, criterion, device):
+def _train_epoch_cls(model, loader, optimizer, criterion, device, scaler=None):
     model.train()
     total_loss = 0.0
     for imgs, labels in loader:
-        imgs, labels = imgs.to(device), labels.to(device)
+        imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True)
         optimizer.zero_grad()
-        logits = model(imgs)
-        loss = criterion(logits, labels)
-        loss.backward()
-        optimizer.step()
+        if scaler is not None:
+            with torch.cuda.amp.autocast():
+                logits = model(imgs)
+                loss = criterion(logits, labels)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            logits = model(imgs)
+            loss = criterion(logits, labels)
+            loss.backward()
+            optimizer.step()
         total_loss += loss.item() * len(imgs)
     return total_loss / len(loader.dataset)
 
@@ -376,7 +411,7 @@ def _eval_epoch_cls(model, loader, criterion, device, num_classes):
     total_loss = 0.0
     with torch.no_grad():
         for imgs, labels in loader:
-            imgs, labels = imgs.to(device), labels.to(device)
+            imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True)
             logits = model(imgs)
             loss = criterion(logits, labels)
             total_loss += loss.item() * len(imgs)

@@ -269,6 +269,18 @@ class MainWindow(QMainWindow):
                 "They are evaluated once at the very end of each run.",
             )
 
+        # Auto-export label CSV to output dir before starting
+        out_dir = cfg["training"].get("output_dir", "./results")
+        csv_path = os.path.join(out_dir, "labels.csv")
+        try:
+            os.makedirs(out_dir, exist_ok=True)
+            from ..utils.csv_handler import export_labels
+            n_rows = export_labels(cfg["experiments"], csv_path,
+                                   class_cfg=cfg.get("classification", {}))
+            self.lbl_status.setText(f"Labels exported: {n_rows} time frames → {csv_path}")
+        except Exception as exc:
+            self.lbl_status.setText(f"Warning: could not auto-export label CSV: {exc}")
+
         self.train_panel.start_training(cfg)
         self.tabs.setCurrentWidget(self.train_panel)
 

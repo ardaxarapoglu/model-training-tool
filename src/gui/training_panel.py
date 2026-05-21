@@ -106,6 +106,12 @@ class TrainingPanel(QWidget):
         self.chk_grid_search = QCheckBox(
             "Enable grid search  (train all combinations of highlighted parameters)"
         )
+        self.chk_grid_search.setToolTip(
+            "Automatically train one model for every combination of the parameters\n"
+            "you mark with 'Grid:' below (e.g. 3 LRs × 2 batch sizes = 6 runs).\n"
+            "All runs share the same epochs, scheduler, and architecture unless those\n"
+            "are also included in the grid. Results are ranked by test RMSE or accuracy."
+        )
         self.chk_grid_search.toggled.connect(self._on_grid_search_toggled)
         gs_v.addWidget(self.chk_grid_search)
         gs_info = QLabel(
@@ -131,15 +137,48 @@ class TrainingPanel(QWidget):
         self.sp_epochs = QSpinBox()
         self.sp_epochs.setRange(1, 9999)
         self.sp_epochs.setValue(50)
+        self.sp_epochs.setToolTip(
+            "Maximum number of complete passes through the training set.\n"
+            "Early stopping will usually halt training before this limit if the model\n"
+            "stops improving, so it is safe to set this high (e.g. 100–200)."
+        )
         ep_row.addWidget(self.sp_epochs)
         ep_row.addStretch()
         params_form.addRow("Epochs:", ep_row)
 
-        self.row_bs   = _ParamRow("Batch size",     "32",    "Images per training batch")
-        self.row_lr   = _ParamRow("Learning rate",  "0.001", "Initial learning rate")
-        self.row_opt  = _ParamRow("Optimizer",      "Adam",  "Adam | SGD | AdamW | RMSprop")
-        self.row_wd   = _ParamRow("Weight decay",   "1e-4",  "L2 regularization coefficient")
-        self.row_loss = _ParamRow("Loss function",  "MSE",   "MSE | MAE | Huber | SmoothL1")
+        self.row_bs = _ParamRow("Batch size", "32",
+            "Number of images processed together in one forward/backward pass.\n"
+            "Larger batches are faster but need more GPU memory.\n"
+            "Typical values: 16 (low VRAM), 32 (default), 64–128 (high VRAM).\n"
+            "Grid: separate multiple values with commas to search across them."
+        )
+        self.row_lr = _ParamRow("Learning rate", "0.001",
+            "Controls how large each weight update step is.\n"
+            "Too high → training diverges (loss explodes).\n"
+            "Too low → very slow convergence.\n"
+            "Good starting range: 0.001 (Adam/AdamW), 0.01 (SGD).\n"
+            "Grid: try 0.01, 0.001, 0.0001 to find the sweet spot."
+        )
+        self.row_opt = _ParamRow("Optimizer", "Adam",
+            "Algorithm used to update model weights after each batch.\n"
+            "• Adam   – adaptive per-parameter LR; robust default for most tasks.\n"
+            "• AdamW  – Adam with corrected weight decay; often slightly better.\n"
+            "• SGD    – simple but needs careful LR and momentum tuning.\n"
+            "• RMSprop – alternative adaptive method; less common."
+        )
+        self.row_wd = _ParamRow("Weight decay", "1e-4",
+            "L2 regularisation: adds a penalty for large weight values.\n"
+            "Reduces overfitting. Typical range: 0 (off) to 1e-3.\n"
+            "Default 1e-4 (= 0.0001) works well for most cases."
+        )
+        self.row_loss = _ParamRow("Loss function", "MSE",
+            "Metric minimised during training (regression mode only).\n"
+            "• MSE     – mean squared error; penalises large errors heavily.\n"
+            "• MAE     – mean absolute error; more robust to outliers.\n"
+            "• Huber   – smooth blend of MSE (small errors) and MAE (large errors).\n"
+            "• SmoothL1 – similar to Huber; often used in object detection.\n"
+            "In classification mode CrossEntropyLoss is always used automatically."
+        )
         for row in (self.row_bs, self.row_lr, self.row_opt, self.row_wd, self.row_loss):
             params_form.addRow(row)
             row.set_grid_visible(False)   # hidden until grid search enabled
@@ -152,8 +191,13 @@ class TrainingPanel(QWidget):
         self.sp_momentum.setValue(0.9)
         self.sp_momentum.setDecimals(2)
         self.sp_momentum.setMaximumWidth(100)
+        self.sp_momentum.setToolTip(
+            "Only used when Optimizer = SGD.\n"
+            "Controls how much the previous gradient direction influences the current step.\n"
+            "0.9 is the standard default."
+        )
         mom_row.addWidget(self.sp_momentum)
-        mom_row.addWidget(QLabel("(used for SGD only)"))
+        mom_row.addWidget(QLabel("(SGD only)"))
         mom_row.addStretch()
         params_form.addRow("SGD momentum:", mom_row)
 
@@ -167,11 +211,24 @@ class TrainingPanel(QWidget):
         for s in ("None", "StepLR", "CosineAnnealingLR", "ReduceLROnPlateau"):
             self.cmb_sched.addItem(s)
         self.cmb_sched.setCurrentText("StepLR")
+        self.cmb_sched.setToolTip(
+            "Controls how the learning rate changes over training:\n"
+            "• None                – constant LR throughout.\n"
+            "• StepLR              – multiply LR by Gamma every Step Size epochs.\n"
+            "• CosineAnnealingLR   – smoothly decay LR from initial to Min LR over T_max\n"
+            "                        epochs, then restart. Good for long runs.\n"
+            "• ReduceLROnPlateau   – cut LR by Gamma when test loss stops improving.\n"
+            "                        Recommended when you're not sure which schedule to use."
+        )
         sched_form.addRow("Type:", self.cmb_sched)
 
         self.sp_step_size = QSpinBox()
         self.sp_step_size.setRange(1, 999)
         self.sp_step_size.setValue(10)
+        self.sp_step_size.setToolTip(
+            "StepLR only: reduce the learning rate every this many epochs.\n"
+            "Example: step_size=10, gamma=0.5 → LR halves at epochs 10, 20, 30, …"
+        )
         sched_form.addRow("Step size:", self.sp_step_size)
 
         self.sp_gamma = QDoubleSpinBox()
@@ -179,16 +236,31 @@ class TrainingPanel(QWidget):
         self.sp_gamma.setSingleStep(0.05)
         self.sp_gamma.setDecimals(2)
         self.sp_gamma.setValue(0.5)
+        self.sp_gamma.setToolTip(
+            "Multiplicative factor applied to LR when the scheduler fires.\n"
+            "• StepLR: new_LR = LR × gamma every step_size epochs.\n"
+            "• ReduceLROnPlateau: new_LR = LR × gamma when progress stalls.\n"
+            "Values < 1 decrease LR; 0.5 halves it, 0.1 reduces by 10×."
+        )
         sched_form.addRow("Gamma:", self.sp_gamma)
 
         self.sp_tmax = QSpinBox()
         self.sp_tmax.setRange(1, 9999)
         self.sp_tmax.setValue(50)
+        self.sp_tmax.setToolTip(
+            "CosineAnnealingLR only: half-period of the cosine cycle in epochs.\n"
+            "LR decays from the initial value to Min LR over T_max epochs, then restarts.\n"
+            "Set to your expected total training length for a single decay cycle."
+        )
         sched_form.addRow("T_max (cosine):", self.sp_tmax)
 
         self.sp_plat_patience = QSpinBox()
         self.sp_plat_patience.setRange(1, 999)
         self.sp_plat_patience.setValue(5)
+        self.sp_plat_patience.setToolTip(
+            "ReduceLROnPlateau only: epochs with no improvement in test loss before LR is cut.\n"
+            "Smaller values reduce LR quickly; larger values give more time to escape plateaus."
+        )
         sched_form.addRow("Plateau patience:", self.sp_plat_patience)
 
         self.sp_min_lr = QDoubleSpinBox()
@@ -196,6 +268,10 @@ class TrainingPanel(QWidget):
         self.sp_min_lr.setSingleStep(1e-6)
         self.sp_min_lr.setDecimals(8)
         self.sp_min_lr.setValue(1e-6)
+        self.sp_min_lr.setToolTip(
+            "Floor for the learning rate — the scheduler will never reduce it below this value.\n"
+            "Prevents LR from becoming so small that training effectively stops."
+        )
         sched_form.addRow("Min LR:", self.sp_min_lr)
 
         # Early stopping
@@ -206,11 +282,20 @@ class TrainingPanel(QWidget):
 
         self.chk_early_stop = QCheckBox("Enable")
         self.chk_early_stop.setChecked(True)
+        self.chk_early_stop.setToolTip(
+            "Stop training automatically when the model stops improving.\n"
+            "Prevents wasting time and reduces overfitting. Strongly recommended."
+        )
         es_form.addRow("", self.chk_early_stop)
 
         self.sp_es_patience = QSpinBox()
         self.sp_es_patience.setRange(1, 999)
         self.sp_es_patience.setValue(15)
+        self.sp_es_patience.setToolTip(
+            "Consecutive epochs with no improvement before training halts.\n"
+            "Larger values give the model more chances to escape temporary plateaus.\n"
+            "Typical range: 5–20. Increase if using a LR scheduler with slow reductions."
+        )
         es_form.addRow("Patience (epochs):", self.sp_es_patience)
 
         self.sp_es_delta = QDoubleSpinBox()
@@ -218,6 +303,11 @@ class TrainingPanel(QWidget):
         self.sp_es_delta.setSingleStep(1e-4)
         self.sp_es_delta.setDecimals(6)
         self.sp_es_delta.setValue(1e-4)
+        self.sp_es_delta.setToolTip(
+            "Minimum change that counts as an improvement.\n"
+            "The patience counter only resets when improvement exceeds this threshold.\n"
+            "1e-4 (= 0.0001) is a safe default; set to 0 to count any improvement."
+        )
         es_form.addRow("Min delta:", self.sp_es_delta)
 
         # Output
@@ -228,6 +318,11 @@ class TrainingPanel(QWidget):
 
         out_row = QHBoxLayout()
         self.edit_out_dir = QLineEdit("./results")
+        self.edit_out_dir.setToolTip(
+            "Folder where trained model checkpoints, label CSV, and result JSON files are saved.\n"
+            "Each run creates a sub-folder named by its run ID (e.g. run_0001).\n"
+            "The Results tab loads from this directory."
+        )
         btn_browse_out = QPushButton("Browse…")
         btn_browse_out.clicked.connect(self._browse_output)
         out_row.addWidget(self.edit_out_dir)
@@ -237,8 +332,21 @@ class TrainingPanel(QWidget):
         self.sp_workers = QSpinBox()
         self.sp_workers.setRange(0, 32)
         self.sp_workers.setValue(0)
-        self.sp_workers.setToolTip("0 = run data loading in main process (safe on Windows)")
+        self.sp_workers.setToolTip(
+            "Number of parallel CPU processes used to load and augment images.\n"
+            "0 = load in the main process (required on Windows; always safe).\n"
+            "On Linux/Mac, 2–4 workers can speed up GPU-bound training\n"
+            "by preparing the next batch while the GPU works on the current one."
+        )
         out_form.addRow("DataLoader workers:", self.sp_workers)
+
+        self.chk_amp = QCheckBox("Automatic Mixed Precision (AMP)")
+        self.chk_amp.setToolTip(
+            "Train using 16-bit floating point where possible (requires Nvidia GPU with Tensor Cores).\n"
+            "Can speed up training by 1.5–3× and halve GPU memory usage with minimal accuracy loss.\n"
+            "Safe to enable for GTX 10xx and newer GPUs; has no effect when training on CPU."
+        )
+        out_form.addRow("", self.chk_amp)
 
         cfg_v.addStretch()
         splitter.addWidget(left)
@@ -475,6 +583,7 @@ class TrainingPanel(QWidget):
             "grid_search_enabled": self.chk_grid_search.isChecked(),
             "output_dir": self.edit_out_dir.text(),
             "num_workers": self.sp_workers.value(),
+            "use_amp": self.chk_amp.isChecked(),
         }
 
     def set_config(self, cfg: dict):
@@ -504,6 +613,7 @@ class TrainingPanel(QWidget):
         self.chk_grid_search.setChecked(bool(cfg.get("grid_search_enabled", False)))
         self.edit_out_dir.setText(str(cfg.get("output_dir", "./results")))
         self.sp_workers.setValue(int(cfg.get("num_workers", 0)))
+        self.chk_amp.setChecked(bool(cfg.get("use_amp", False)))
 
 
 # ---------------------------------------------------------------- helpers

@@ -87,6 +87,7 @@ def default_config() -> dict:
             "grid_search_enabled": False,
             "output_dir": "./results",
             "num_workers": 0,
+            "use_amp": False,
             "pin_memory": False,
         },
     }

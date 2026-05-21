@@ -14,43 +14,50 @@
           "name": "Y1",
           "pb_concentration": 70.464,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y1",
-          "notes": ""
+          "notes": "",
+          "time_interval": ""
         },
         {
           "name": "Y2",
           "pb_concentration": 70.908,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y2",
-          "notes": ""
+          "notes": "",
+          "time_interval": ""
         },
         {
           "name": "Y3",
           "pb_concentration": 58.315,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y3",
-          "notes": ""
+          "notes": "",
+          "time_interval": ""
         },
         {
           "name": "Y4",
           "pb_concentration": 15.717,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y4",
-          "notes": ""
+          "notes": "",
+          "time_interval": ""
         },
         {
           "name": "Y5",
           "pb_concentration": 7.14,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y5",
-          "notes": ""
+          "notes": "",
+          "time_interval": ""
         },
         {
           "name": "Y6",
           "pb_concentration": 1.745,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y6",
-          "notes": ""
+          "notes": "",
+          "time_interval": ""
         },
         {
           "name": "Y7",
           "pb_concentration": 3.815,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y7",
-          "notes": ""
+          "notes": "",
+          "time_interval": ""
         }
       ]
     },
@@ -903,15 +910,15 @@
   "model": {
     "mode": "transfer",
     "transfer": {
-      "architecture": "ResNet-50",
+      "architecture": "ResNet-18",
       "pretrained": true,
       "freeze_backbone": false,
       "unfreeze_last_n": 0,
       "dropout": 0.5,
       "architecture_grid": {
-        "use_grid": true,
+        "use_grid": false,
         "values": "ResNet-50,EfficientNet-B0,EfficientNet-B3,MobileNet-V3-Large",
-        "value": "ResNet-50"
+        "value": "ResNet-18"
       }
     },
     "scratch": {
@@ -928,15 +935,23 @@
       "enabled": true,
       "classes": [
         {
-          "name": "Bad",
+          "name": "<10",
+          "max": 10.0
+        },
+        {
+          "name": "10-20",
           "max": 20.0
         },
         {
-          "name": "Acceptable",
+          "name": "20-30",
+          "max": 30.0
+        },
+        {
+          "name": "30-40",
           "max": 40.0
         },
         {
-          "name": "Good",
+          "name": "40<",
           "max": null
         }
       ]
@@ -946,23 +961,23 @@
     "enabled": true,
     "classes": [
       {
-        "name": "very_bad",
+        "name": "<10",
         "max": 10.0
       },
       {
-        "name": "bad",
+        "name": "10-20",
         "max": 20.0
       },
       {
-        "name": "acceptable",
+        "name": "20-30",
         "max": 30.0
       },
       {
-        "name": "good",
+        "name": "30-40",
         "max": 40.0
       },
       {
-        "name": "very_good",
+        "name": "40<",
         "max": null
       }
     ]
@@ -996,7 +1011,7 @@
     },
     "momentum": 0.9,
     "lr_scheduler": {
-      "type": "ReduceLROnPlateau",
+      "type": "StepLR",
       "step_size": 10,
       "gamma": 0.5,
       "t_max": 30,
@@ -1008,7 +1023,7 @@
       "patience": 8,
       "min_delta": 0.0001
     },
-    "grid_search_enabled": true,
+    "grid_search_enabled": false,
     "output_dir": "./results",
     "num_workers": 0
   }

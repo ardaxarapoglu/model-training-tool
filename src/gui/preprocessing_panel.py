@@ -87,11 +87,25 @@ class PreprocessingPanel(QWidget):
         grp_v = QVBoxLayout(grp_crop)
 
         self.chk_crop = QCheckBox("Enable cropping")
+        self.chk_crop.setToolTip(
+            "Cut a region from each image before resizing.\n"
+            "Useful to remove camera borders, overlays, or irrelevant background.\n"
+            "If your images are already clean, leave this off."
+        )
         grp_v.addWidget(self.chk_crop)
 
         mode_row = QHBoxLayout()
         self.rb_manual = QRadioButton("Manual (x, y, w, h)")
+        self.rb_manual.setToolTip(
+            "Crop a fixed rectangle defined by pixel coordinates.\n"
+            "x, y = top-left corner; w, h = width and height of the crop region.\n"
+            "Use when the camera is fixed and the region of interest is always at the same position."
+        )
         self.rb_center = QRadioButton("Center crop (size)")
+        self.rb_center.setToolTip(
+            "Crop a square of the given size from the centre of the image.\n"
+            "Useful when the interesting area is always in the middle of the frame."
+        )
         self.rb_manual.setChecked(True)
         bg = QButtonGroup(self)
         bg.addButton(self.rb_manual)
@@ -102,12 +116,17 @@ class PreprocessingPanel(QWidget):
         grp_v.addLayout(mode_row)
 
         manual_row = QHBoxLayout()
+        _tips = {"x:": "Left edge of crop in pixels (0 = image left)",
+                 "y:": "Top edge of crop in pixels (0 = image top)",
+                 "w:": "Width of the crop region in pixels",
+                 "h:": "Height of the crop region in pixels"}
         for lbl, attr in [("x:", "sp_cx"), ("y:", "sp_cy"), ("w:", "sp_cw"), ("h:", "sp_ch")]:
             manual_row.addWidget(QLabel(lbl))
             sp = QSpinBox()
             sp.setRange(0, 9999)
             sp.setValue(0 if lbl in ("x:", "y:") else 224)
             sp.setMaximumWidth(80)
+            sp.setToolTip(_tips[lbl])
             setattr(self, attr, sp)
             manual_row.addWidget(sp)
         manual_row.addStretch()
@@ -118,6 +137,7 @@ class PreprocessingPanel(QWidget):
         self.sp_center_size = QSpinBox()
         self.sp_center_size.setRange(16, 9999)
         self.sp_center_size.setValue(224)
+        self.sp_center_size.setToolTip("Side length (in pixels) of the square crop taken from the image centre.")
         center_row.addWidget(self.sp_center_size)
         center_row.addStretch()
         grp_v.addLayout(center_row)
@@ -136,9 +156,16 @@ class PreprocessingPanel(QWidget):
         self.sp_rw = QSpinBox()
         self.sp_rw.setRange(16, 1024)
         self.sp_rw.setValue(224)
+        self.sp_rw.setToolTip(
+            "All images are resized to this width before being fed to the model.\n"
+            "Most pre-trained architectures expect 224×224.\n"
+            "Larger sizes (e.g. 299 for Inception, 384 for EfficientNet-B4) can improve\n"
+            "accuracy but use more GPU memory and train slower."
+        )
         self.sp_rh = QSpinBox()
         self.sp_rh.setRange(16, 1024)
         self.sp_rh.setValue(224)
+        self.sp_rh.setToolTip(self.sp_rw.toolTip())
         rw.addWidget(self.sp_rw)
         rw.addWidget(QLabel("×"))
         rw.addWidget(self.sp_rh)
@@ -151,12 +178,26 @@ class PreprocessingPanel(QWidget):
         norm_v = QVBoxLayout(grp_norm)
         self.chk_imagenet_norm = QCheckBox("Use ImageNet mean/std  (recommended for transfer learning)")
         self.chk_imagenet_norm.setChecked(True)
+        self.chk_imagenet_norm.setToolTip(
+            "Normalise pixel values using the mean and standard deviation of the ImageNet dataset\n"
+            "(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]).\n"
+            "Pre-trained models were trained with this normalisation, so it must match.\n"
+            "Uncheck only if training from scratch with custom normalisation values."
+        )
         norm_v.addWidget(self.chk_imagenet_norm)
 
         custom_row = QFormLayout()
         custom_row.setLabelAlignment(Qt.AlignRight)
         self.edit_mean = _make_line("0.485, 0.456, 0.406")
+        self.edit_mean.setToolTip(
+            "Per-channel mean to subtract from pixel values (R, G, B), each in [0, 1].\n"
+            "Compute from your own dataset with numpy if not using ImageNet values."
+        )
         self.edit_std = _make_line("0.229, 0.224, 0.225")
+        self.edit_std.setToolTip(
+            "Per-channel standard deviation to divide by after mean subtraction (R, G, B).\n"
+            "Together with the mean, this centres the data around 0 for stable training."
+        )
         custom_row.addRow("Mean (R,G,B):", self.edit_mean)
         custom_row.addRow("Std  (R,G,B):", self.edit_std)
         norm_v.addLayout(custom_row)
@@ -172,8 +213,22 @@ class PreprocessingPanel(QWidget):
 
         aug_v.addWidget(_section_label("Flips & Rotation"))
         self.aug_hflip = AugmentRow("Horizontal Flip", [("p:", 0.5, 0.0, 1.0, 0.05, 2)])
+        self.aug_hflip.chk.setToolTip(
+            "Randomly mirror each image left-right with probability p.\n"
+            "Free source of extra training data when the froth has no left/right bias.\n"
+            "p=0.5 means each image has a 50% chance of being flipped."
+        )
         self.aug_vflip = AugmentRow("Vertical Flip",   [("p:", 0.5, 0.0, 1.0, 0.05, 2)])
+        self.aug_vflip.chk.setToolTip(
+            "Randomly mirror each image top-to-bottom with probability p.\n"
+            "Useful if there is no meaningful up/down orientation in the froth camera."
+        )
         self.aug_rot   = AugmentRow("Random Rotation 0/90/180/270")
+        self.aug_rot.chk.setToolTip(
+            "Randomly rotate each image by 0°, 90°, 180°, or 270° (equal probability).\n"
+            "Discrete steps avoid black corners that free-angle rotation produces.\n"
+            "Enable when the froth appearance is rotationally symmetric."
+        )
         self.aug_hflip.chk.setChecked(True)
         aug_v.addWidget(self.aug_hflip)
         aug_v.addWidget(self.aug_vflip)
@@ -186,6 +241,12 @@ class PreprocessingPanel(QWidget):
             ("saturation:", 0.2, 0.0, 2.0, 0.05, 2),
             ("hue:",        0.05, 0.0, 0.5, 0.01, 2),
         ])
+        self.aug_cj.chk.setToolTip(
+            "Randomly perturb brightness, contrast, saturation, and hue of each image.\n"
+            "Makes the model robust to lighting changes between experiments or shifts.\n"
+            "Each value is the maximum factor by which that property is changed.\n"
+            "Small values (0.1–0.3) are usually sufficient for froth images."
+        )
         self.aug_cj.chk.setChecked(True)
         aug_v.addWidget(self.aug_cj)
 
@@ -194,11 +255,27 @@ class PreprocessingPanel(QWidget):
             ("scale min:", 0.8, 0.1, 1.0, 0.05, 2),
             ("scale max:", 1.0, 0.1, 1.0, 0.05, 2),
         ])
+        self.aug_rrc.chk.setToolTip(
+            "Crop a random sub-region of the image (between scale_min and scale_max of the area)\n"
+            "and resize it back to the target size.\n"
+            "Teaches the model to recognise froth texture at different scales and positions.\n"
+            "scale_min=0.8 means crops are at least 80% of the original image area."
+        )
         aug_v.addWidget(self.aug_rrc)
 
         aug_v.addWidget(_section_label("Noise / Regularization"))
         self.aug_blur = AugmentRow("Gaussian Blur", [("kernel:", 5, 3, 21, 2, 0)])
+        self.aug_blur.chk.setToolTip(
+            "Apply a Gaussian blur with the given kernel size to simulate out-of-focus frames.\n"
+            "Makes the model more robust to slight camera defocus.\n"
+            "Kernel size must be an odd number; larger values = more blur."
+        )
         self.aug_erase = AugmentRow("Random Erasing", [("p:", 0.2, 0.0, 1.0, 0.05, 2)])
+        self.aug_erase.chk.setToolTip(
+            "With probability p, replace a random rectangular patch with noise.\n"
+            "Forces the model to use the whole image rather than focusing on one region.\n"
+            "Acts as a strong regulariser, similar to Dropout but in pixel space."
+        )
         aug_v.addWidget(self.aug_blur)
         aug_v.addWidget(self.aug_erase)
 

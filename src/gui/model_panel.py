@@ -38,7 +38,17 @@ class ModelPanel(QWidget):
 
         out_mode_row = QHBoxLayout()
         self.rb_regression = QRadioButton("Regression  (predict Pb% as a continuous value)")
+        self.rb_regression.setToolTip(
+            "The model outputs a single number representing the predicted Pb concentration.\n"
+            "Evaluated with RMSE, MAE, and R² metrics.\n"
+            "Best when you need a precise numeric estimate."
+        )
         self.rb_classify   = QRadioButton("Classification  (predict a named category)")
+        self.rb_classify.setToolTip(
+            "The model assigns each image to one of the named classes you define below.\n"
+            "Evaluated with accuracy, F1 score, and confusion matrix.\n"
+            "Best when you need a simple actionable label (e.g. Good / Acceptable / Bad)."
+        )
         self.rb_regression.setChecked(True)
         bg_out = QButtonGroup(self)
         bg_out.addButton(self.rb_regression)
@@ -92,7 +102,18 @@ class ModelPanel(QWidget):
 
         mode_row = QHBoxLayout()
         self.rb_transfer = QRadioButton("Transfer Learning  (recommended)")
+        self.rb_transfer.setToolTip(
+            "Start from a model pre-trained on ImageNet (1.2 million photos).\n"
+            "The network already knows how to detect edges, textures, and shapes.\n"
+            "Only the final prediction head is re-trained (or the whole network fine-tuned).\n"
+            "Reaches good results with far fewer froth images and training epochs."
+        )
         self.rb_scratch  = QRadioButton("Train from Scratch")
+        self.rb_scratch.setToolTip(
+            "Build and train a simple CNN using only your froth images.\n"
+            "Requires more data and epochs to reach similar accuracy.\n"
+            "Useful if the froth texture is very different from natural photos."
+        )
         self.rb_transfer.setChecked(True)
         bg = QButtonGroup(self)
         bg.addButton(self.rb_transfer)
@@ -118,6 +139,16 @@ class ModelPanel(QWidget):
         for name in ARCHITECTURES:
             self.cmb_arch.addItem(name, name)
         self.cmb_arch.setCurrentText("ResNet-50")
+        self.cmb_arch.setToolTip(
+            "The backbone CNN architecture used for feature extraction.\n"
+            "• ResNet-50 / 101   – solid all-around choice; fast to train.\n"
+            "• EfficientNet-B0   – small and fast; good for limited GPU memory.\n"
+            "• EfficientNet-B3/4 – larger, often more accurate, slower.\n"
+            "• MobileNet-V3      – very fast but lower capacity.\n"
+            "• DenseNet-121      – connects all layers; strong feature reuse.\n"
+            "• VGG-16 / 19       – older, large memory footprint, usually outperformed.\n"
+            "Use the Architecture Grid Search below to compare several at once."
+        )
         tp.addRow("Architecture:", self.cmb_arch)
 
         arch_info = QLabel(
@@ -128,9 +159,21 @@ class ModelPanel(QWidget):
 
         self.chk_pretrained = QCheckBox("Use pretrained ImageNet weights")
         self.chk_pretrained.setChecked(True)
+        self.chk_pretrained.setToolTip(
+            "Load weights trained on ImageNet as the starting point.\n"
+            "Strongly recommended — the network already knows general visual features\n"
+            "and will converge much faster with far fewer froth images.\n"
+            "Only disable if you suspect ImageNet features are harmful for your data."
+        )
         tp.addRow("", self.chk_pretrained)
 
         self.chk_freeze = QCheckBox("Freeze backbone  (only train head)")
+        self.chk_freeze.setToolTip(
+            "Lock all backbone weights so only the final prediction head is updated.\n"
+            "Very fast — only a few thousand parameters are trained.\n"
+            "Good first step when you have very few images (< ~500 per class).\n"
+            "Combine with 'Unfreeze last N' to fine-tune the top layers gradually."
+        )
         tp.addRow("", self.chk_freeze)
 
         unfreeze_row = QHBoxLayout()
@@ -151,6 +194,11 @@ class ModelPanel(QWidget):
         self.sp_dropout_t.setSingleStep(0.05)
         self.sp_dropout_t.setDecimals(2)
         self.sp_dropout_t.setValue(0.5)
+        self.sp_dropout_t.setToolTip(
+            "Randomly zeros this fraction of neurons in the prediction head during training.\n"
+            "Acts as regularisation — forces the network to not rely on any single neuron.\n"
+            "0.5 (50%) is a strong default. Reduce to 0.2–0.3 if the model underfits."
+        )
         tp.addRow("Dropout (head):", self.sp_dropout_t)
 
         # Grid search for architecture
@@ -159,9 +207,17 @@ class ModelPanel(QWidget):
         gs_lbl.setStyleSheet("color:#555;font-size:11px;")
         tp.addRow("", gs_lbl)
         self.chk_arch_grid = QCheckBox("Include architecture in grid search")
+        self.chk_arch_grid.setToolTip(
+            "When grid search is enabled, train one run per architecture listed below.\n"
+            "Combine with LR / batch size grid rows to find the best architecture + hyperparameters."
+        )
         tp.addRow("", self.chk_arch_grid)
         self.edit_arch_values = QLineEdit()
         self.edit_arch_values.setPlaceholderText("e.g., ResNet-50,ResNet-101,EfficientNet-B0")
+        self.edit_arch_values.setToolTip(
+            "Comma-separated list of architectures to sweep over during grid search.\n"
+            "Must match names in the Architecture dropdown exactly."
+        )
         self.edit_arch_values.setEnabled(False)
         self.chk_arch_grid.toggled.connect(self.edit_arch_values.setEnabled)
         tp.addRow("Architectures:", self.edit_arch_values)
@@ -177,6 +233,12 @@ class ModelPanel(QWidget):
         self.sp_conv_blocks = QSpinBox()
         self.sp_conv_blocks.setRange(2, 8)
         self.sp_conv_blocks.setValue(4)
+        self.sp_conv_blocks.setToolTip(
+            "Number of convolutional blocks stacked in the network.\n"
+            "Each block doubles the number of feature channels.\n"
+            "More blocks = more capacity but slower training and more risk of overfitting.\n"
+            "4 blocks is a reasonable starting point for 224×224 images."
+        )
         sp_layout.addRow("Conv blocks:", self.sp_conv_blocks)
 
         self.sp_base_filters = QSpinBox()
@@ -193,6 +255,11 @@ class ModelPanel(QWidget):
 
         self.chk_batch_norm = QCheckBox("Batch normalization")
         self.chk_batch_norm.setChecked(True)
+        self.chk_batch_norm.setToolTip(
+            "Normalise the output of each conv block so it has mean≈0 and std≈1.\n"
+            "Stabilises training, allows higher learning rates, and usually improves accuracy.\n"
+            "Almost always beneficial — only disable if you're experimenting."
+        )
         sp_layout.addRow("", self.chk_batch_norm)
 
         self.sp_dropout_s = QDoubleSpinBox()
@@ -200,6 +267,10 @@ class ModelPanel(QWidget):
         self.sp_dropout_s.setSingleStep(0.05)
         self.sp_dropout_s.setDecimals(2)
         self.sp_dropout_s.setValue(0.5)
+        self.sp_dropout_s.setToolTip(
+            "Randomly zeros this fraction of neurons in the FC layers during training.\n"
+            "Reduces overfitting. 0.5 is a strong default; reduce to 0.2–0.3 if underfitting."
+        )
         sp_layout.addRow("Dropout:", self.sp_dropout_s)
 
         sp_info = QLabel(
