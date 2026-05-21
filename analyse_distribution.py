@@ -1,6 +1,8 @@
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
 import numpy as np
 
 data_raw = {
@@ -26,26 +28,48 @@ frames  = ["Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7"]
 exp_ids = list(data_raw.keys())
 matrix  = np.array([data_raw[e] for e in exp_ids])   # (17, 7)
 
-fig, axes = plt.subplots(1, 2, figsize=(18, 8))
-fig.suptitle("Pb Tenörü (%) — raw values", fontsize=13, fontweight="bold")
+# ---- Class definitions (low → high) ----
+BOUNDS  = [0, 3, 10, 25, 40, 55, 100]   # bin edges
+COLORS  = ["#7B0000", "#D32F2F", "#F57C00", "#FDD835", "#66BB6A", "#1B5E20"]
+LABELS  = ["c < 3", "3 ≤ c < 10", "10 ≤ c < 25", "25 ≤ c < 40", "40 ≤ c < 55", "c ≥ 55"]
+
+cmap = mcolors.ListedColormap(COLORS)
+norm = mcolors.BoundaryNorm(BOUNDS, cmap.N)
+
+# Legend patches
+legend_patches = [
+    mpatches.Patch(facecolor=c, edgecolor="#555", label=l)
+    for c, l in zip(COLORS, LABELS)
+]
+
+fig, axes = plt.subplots(1, 2, figsize=(20, 9))
+fig.suptitle("Pb Tenörü (%) — class distribution", fontsize=13, fontweight="bold")
 
 for ax, transpose, row_labels, col_labels, title in [
-    (axes[0], False, exp_ids, frames,   "Experiments (rows) × Time Frames (cols)"),
-    (axes[1], True,  frames,  exp_ids,  "Time Frames (rows) × Experiments (cols)"),
+    (axes[0], False, exp_ids, frames,  "Experiments (rows) × Time Frames (cols)"),
+    (axes[1], True,  frames,  exp_ids, "Time Frames (rows) × Experiments (cols)"),
 ]:
     data = matrix if not transpose else matrix.T
-    im = ax.imshow(data, aspect="auto", cmap="RdYlGn", vmin=0, vmax=75)
-    ax.set_xticks(range(len(col_labels))); ax.set_xticklabels(col_labels, fontsize=9)
-    ax.set_yticks(range(len(row_labels))); ax.set_yticklabels(row_labels, fontsize=9)
+    ax.imshow(data, aspect="auto", cmap=cmap, norm=norm)
+    ax.set_xticks(range(len(col_labels)))
+    ax.set_xticklabels(col_labels, fontsize=9)
+    ax.set_yticks(range(len(row_labels)))
+    ax.set_yticklabels(row_labels, fontsize=9)
     ax.set_title(title, fontsize=10, fontweight="bold")
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             v = data[i, j]
+            # White text on dark cells, black on bright ones
+            dark = v < 3 or v >= 55
             ax.text(j, i, f"{v:.1f}", ha="center", va="center",
                     fontsize=8, fontweight="bold",
-                    color="black" if 10 < v < 60 else "white")
-    fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02).set_label("Pb %", fontsize=9)
+                    color="white" if dark else "black")
 
-plt.tight_layout()
+# Shared legend below both plots
+fig.legend(handles=legend_patches, loc="lower center", ncol=6,
+           fontsize=9, frameon=True, title="Pb % class",
+           title_fontsize=9, bbox_to_anchor=(0.5, 0.01))
+
+plt.tight_layout(rect=[0, 0.06, 1, 1])
 plt.savefig("pb_distribution.png", dpi=150, bbox_inches="tight")
 print("Saved pb_distribution.png")
