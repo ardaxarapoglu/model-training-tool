@@ -235,10 +235,31 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------ training bridge
     def _on_run_training(self):
         cfg = self._full_config()
+
+        # Pre-flight validation — block if there are hard errors
+        errors, warnings = self._validate_training_config(cfg)
+        if errors:
+            QMessageBox.critical(
+                self, "Cannot Start Training",
+                "Fix the following issues before training:\n\n" +
+                "\n".join(f"• {e}" for e in errors),
+            )
+            return
+
+        if warnings:
+            reply = QMessageBox.warning(
+                self, "Training Warnings",
+                "Warnings (training will continue but results may be affected):\n\n" +
+                "\n".join(f"• {w}" for w in warnings) +
+                "\n\nProceed anyway?",
+                QMessageBox.Yes | QMessageBox.No,
+            )
+            if reply != QMessageBox.Yes:
+                return
+
+        # Validation-set isolation notice
         experiments = cfg.get("experiments", [])
         val_exps = [e for e in experiments if e.get("split") == "validation"]
-
-        # Hard validation set safety check
         if val_exps:
             QMessageBox.information(
                 self,
@@ -250,6 +271,77 @@ class MainWindow(QMainWindow):
 
         self.train_panel.start_training(cfg)
         self.tabs.setCurrentWidget(self.train_panel)
+
+    @staticmethod
+    def _validate_training_config(cfg: dict):
+        """Return (errors, warnings) lists.  Errors block training; warnings prompt."""
+        from ..core.dataset import collect_samples
+        errors = []
+        warnings = []
+
+        experiments = cfg.get("experiments", [])
+        class_cfg   = cfg.get("classification", {"enabled": False, "classes": []})
+
+        if not experiments:
+            errors.append("No experiments defined.  Go to the Experiments tab and add at least one.")
+            return errors, warnings
+
+        # Count usable images per split
+        split_counts = {}
+        missing_folders = []
+        for split in ("train", "test", "validation"):
+            try:
+                samples = collect_samples(experiments, split, class_cfg)
+                split_counts[split] = len(samples)
+            except Exception as exc:
+                errors.append(f"Error scanning {split} samples: {exc}")
+                split_counts[split] = 0
+
+        # Check for experiments with no folder paths set
+        for exp in experiments:
+            for tf in exp.get("time_frames", []):
+                folder = tf.get("folder_path", "")
+                if folder and not __import__("os").path.isdir(folder):
+                    missing_folders.append(
+                        f"{exp.get('id','?')} / {tf.get('name','?')}: {folder}"
+                    )
+
+        if missing_folders:
+            snippet = "\n  ".join(missing_folders[:5])
+            suffix  = f"\n  … and {len(missing_folders)-5} more" if len(missing_folders) > 5 else ""
+            warnings.append(
+                f"{len(missing_folders)} folder path(s) do not exist (skipped):\n  {snippet}{suffix}"
+            )
+
+        if split_counts.get("train", 0) == 0:
+            errors.append(
+                "No training images found.  Make sure at least one experiment is set to "
+                "'train' and its time-frame folder paths are correct."
+            )
+
+        if split_counts.get("test", 0) == 0:
+            warnings.append(
+                "No test images found.  Early stopping will use training loss instead of "
+                "test loss, which may cause overfitting."
+            )
+
+        # Classification-specific checks
+        if class_cfg.get("enabled", False):
+            classes = class_cfg.get("classes", [])
+            if len(classes) < 2:
+                errors.append("Classification is enabled but fewer than 2 classes are defined.")
+            else:
+                # Check boundaries are ascending
+                bounds = [c.get("max") for c in classes[:-1]]
+                if any(b is None for b in bounds):
+                    errors.append(
+                        "A non-final class has no upper bound set.  "
+                        "Only the last class should have an empty upper bound."
+                    )
+                elif bounds != sorted(bounds):
+                    errors.append("Class boundaries are not in ascending order.")
+
+        return errors, warnings
 
     def receive_training_results(self, results: list):
         """Called by TrainingPanel when training finishes."""

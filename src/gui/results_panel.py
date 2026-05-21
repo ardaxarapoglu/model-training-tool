@@ -334,7 +334,9 @@ class ResultsPanel(QWidget):
         self.ax_loss.set_xlabel("Epoch")
         self.ax_loss.set_ylabel("Loss")
         self.ax_loss.set_title(f"Loss — {r.get('run_id', '')}")
-        self.ax_loss.legend(fontsize=8)
+        handles, _ = self.ax_loss.get_legend_handles_labels()
+        if handles:
+            self.ax_loss.legend(fontsize=8)
         self.ax_loss.grid(True, alpha=0.3)
         self.canvas_loss.draw()
 

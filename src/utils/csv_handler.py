@@ -1,4 +1,9 @@
-"""Generate and read label CSV files mapping image paths to PB concentrations."""
+"""Generate and read label CSV files mapping time-frame folders to PB concentrations.
+
+One row per time frame (folder) — all images inside share the same label, so
+listing each image individually is redundant.  The num_images column records
+how many image files are present in the folder at export time.
+"""
 import os
 import csv
 
@@ -7,10 +12,11 @@ IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"}
 
 
 def export_labels(experiments: list, output_path: str, class_cfg: dict = None) -> int:
-    """Write a label CSV.  Returns the number of rows written."""
+    """Write a label CSV (one row per time frame).  Returns the number of rows written."""
     use_cls = class_cfg and class_cfg.get("enabled", False)
     classes = class_cfg.get("classes", []) if use_cls else []
-    fieldnames = ["image_path", "experiment", "time_frame", "pb_concentration", "split"]
+    fieldnames = ["experiment", "time_frame", "folder_path",
+                  "pb_concentration", "num_images", "split"]
     if use_cls:
         fieldnames.append("class_label")
     rows = _build_rows(experiments, classes if use_cls else None)
@@ -29,6 +35,16 @@ def _pb_to_class(pb: float, classes: list) -> int:
     return len(classes) - 1
 
 
+def _count_images(folder: str) -> int:
+    try:
+        return sum(
+            1 for f in os.listdir(folder)
+            if os.path.splitext(f)[1].lower() in IMAGE_EXTS
+        )
+    except OSError:
+        return 0
+
+
 def _build_rows(experiments: list, classes: list = None) -> list:
     rows = []
     for exp in experiments:
@@ -39,18 +55,18 @@ def _build_rows(experiments: list, classes: list = None) -> list:
             if not folder or not os.path.isdir(folder):
                 continue
             pb = tf.get("pb_concentration", 0.0)
-            for fname in sorted(os.listdir(folder)):
-                if os.path.splitext(fname)[1].lower() in IMAGE_EXTS:
-                    row = {
-                        "image_path": os.path.join(folder, fname),
-                        "experiment": exp_id,
-                        "time_frame": tf.get("name", ""),
-                        "pb_concentration": pb,
-                        "split": split,
-                    }
-                    if classes:
-                        row["class_label"] = _pb_to_class(float(pb), classes)
-                    rows.append(row)
+            n_imgs = _count_images(folder)
+            row = {
+                "experiment":      exp_id,
+                "time_frame":      tf.get("name", ""),
+                "folder_path":     folder,
+                "pb_concentration": pb,
+                "num_images":      n_imgs,
+                "split":           split,
+            }
+            if classes:
+                row["class_label"] = _pb_to_class(float(pb), classes)
+            rows.append(row)
     return rows
 
 
