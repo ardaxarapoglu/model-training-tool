@@ -124,18 +124,27 @@ class MainWindow(QMainWindow):
 
     # ------------------------------------------------------------------ config
     def _full_config(self) -> dict:
+        model_cfg = self.model_panel.get_config()
+        # classification lives in model_cfg["classification"]; surface it top-level for trainer
         return {
-            "experiments":  self.exp_panel.get_config(),
-            "preprocessing": self.prep_panel.get_config(),
-            "model":        self.model_panel.get_config(),
-            "training":     self.train_panel.get_config(),
+            "experiments":    self.exp_panel.get_config(),
+            "preprocessing":  self.prep_panel.get_config(),
+            "model":          model_cfg,
+            "classification": model_cfg.get("classification", {"enabled": False, "classes": []}),
+            "training":       self.train_panel.get_config(),
         }
 
     def _apply_config(self, cfg: dict):
-        if "experiments"  in cfg: self.exp_panel.set_config(cfg["experiments"])
+        if "experiments"   in cfg: self.exp_panel.set_config(cfg["experiments"])
         if "preprocessing" in cfg: self.prep_panel.set_config(cfg["preprocessing"])
-        if "model"        in cfg: self.model_panel.set_config(cfg["model"])
-        if "training"     in cfg: self.train_panel.set_config(cfg["training"])
+        if "model"         in cfg:
+            model_cfg = cfg["model"]
+            # Back-fill classification from top-level key if present (old saves)
+            if "classification" in cfg and "classification" not in model_cfg:
+                model_cfg = dict(model_cfg)
+                model_cfg["classification"] = cfg["classification"]
+            self.model_panel.set_config(model_cfg)
+        if "training"      in cfg: self.train_panel.set_config(cfg["training"])
 
     # ------------------------------------------------------------------ menu actions
     def _new_project(self):
@@ -193,7 +202,9 @@ class MainWindow(QMainWindow):
         if not path:
             return
         try:
-            n = export_labels(experiments, path)
+            model_cfg = self.model_panel.get_config()
+            class_cfg = model_cfg.get("classification", {"enabled": False, "classes": []})
+            n = export_labels(experiments, path, class_cfg=class_cfg)
             self.lbl_status.setText(f"CSV exported: {n} rows → {path}")
             QMessageBox.information(self, "Exported", f"{n} image-label rows written to:\n{path}")
         except Exception as e:
@@ -242,6 +253,9 @@ class MainWindow(QMainWindow):
 
     def receive_training_results(self, results: list):
         """Called by TrainingPanel when training finishes."""
+        # Keep the results panel's output_dir in sync with current training config
+        out_dir = self.train_panel.get_config().get("output_dir", "./results")
+        self.res_panel.set_output_dir(out_dir)
         self.res_panel.add_results(results)
         self.tabs.setCurrentWidget(self.res_panel)
         self.lbl_status.setText(f"Training complete — {len(results)} run(s)")

@@ -47,6 +47,7 @@ class GridSearchWorker(QThread):
     run_finished = Signal(int, dict)       # run_num, result
     run_log = Signal(str)
     run_progress = Signal(int, int, int, int)  # run_num, total_runs, epoch, total_epochs
+    epoch_metrics = Signal(dict)           # relayed from current TrainingWorker
     all_done = Signal(list)                # list of all results
     error = Signal(str)
 
@@ -83,7 +84,7 @@ class GridSearchWorker(QThread):
                 # Connect relay signals
                 worker.log.connect(self.run_log)
                 worker.progress.connect(lambda ep, tot, _i=i, _t=total: self.run_progress.emit(_i + 1, _t, ep, tot))
-                worker.epoch_metrics.connect(lambda m: None)  # consumed by run_log
+                worker.epoch_metrics.connect(self.epoch_metrics)
 
                 result_holder = []
 

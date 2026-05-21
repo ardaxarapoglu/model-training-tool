@@ -28,7 +28,7 @@ IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"}
 
 
 class FrothDataset(Dataset):
-    """Map image files to their PB-concentration (regression) labels."""
+    """Map image files to regression (float) or classification (int) labels."""
 
     def __init__(self, samples: List[Tuple[str, float]], transform=None):
         self.samples = samples
@@ -42,11 +42,27 @@ class FrothDataset(Dataset):
         img = Image.open(path).convert("RGB")
         if self.transform:
             img = self.transform(img)
-        return img, torch.tensor(label, dtype=torch.float32)
+        dtype = torch.long if isinstance(label, int) else torch.float32
+        return img, torch.tensor(label, dtype=dtype)
 
 
-def collect_samples(experiments: list, split: str) -> List[Tuple[str, float]]:
-    """Gather (image_path, pb_concentration) tuples for the requested split."""
+def pb_to_class(pb: float, classes: list) -> int:
+    """Map a pb_concentration float to a class index using ordered class boundaries."""
+    for i, cls in enumerate(classes[:-1]):
+        max_val = cls.get("max")
+        if max_val is not None and pb < float(max_val):
+            return i
+    return len(classes) - 1
+
+
+def collect_samples(experiments: list, split: str, class_cfg: dict = None) -> list:
+    """Gather (image_path, label) tuples for the requested split.
+
+    label is a float (pb_concentration) for regression, or an int (class index)
+    for classification when class_cfg is provided and enabled.
+    """
+    use_cls = class_cfg and class_cfg.get("enabled", False)
+    classes = class_cfg.get("classes", []) if use_cls else []
     samples = []
     for exp in experiments:
         if exp.get("split") != split:
@@ -56,9 +72,10 @@ def collect_samples(experiments: list, split: str) -> List[Tuple[str, float]]:
             if not folder or not os.path.isdir(folder):
                 continue
             pb = float(tf.get("pb_concentration", 0.0))
+            label = pb_to_class(pb, classes) if use_cls else pb
             for fname in sorted(os.listdir(folder)):
                 if os.path.splitext(fname)[1].lower() in IMAGE_EXTS:
-                    samples.append((os.path.join(folder, fname), pb))
+                    samples.append((os.path.join(folder, fname), label))
     return samples
 
 

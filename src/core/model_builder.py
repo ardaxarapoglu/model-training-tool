@@ -22,14 +22,14 @@ ARCHITECTURES = {
 }
 
 
-def build_model(model_cfg: dict) -> nn.Module:
+def build_model(model_cfg: dict, num_outputs: int = 1) -> nn.Module:
     mode = model_cfg.get("mode", "transfer")
     if mode == "transfer":
-        return _build_transfer(model_cfg.get("transfer", {}))
-    return _build_scratch(model_cfg.get("scratch", {}))
+        return _build_transfer(model_cfg.get("transfer", {}), num_outputs)
+    return _build_scratch(model_cfg.get("scratch", {}), num_outputs)
 
 
-def _build_transfer(cfg: dict) -> nn.Module:
+def _build_transfer(cfg: dict, num_outputs: int = 1) -> nn.Module:
     arch_key = cfg.get("architecture", "ResNet-50")
     arch_id = ARCHITECTURES.get(arch_key, arch_key)
     pretrained = cfg.get("pretrained", True)
@@ -42,26 +42,26 @@ def _build_transfer(cfg: dict) -> nn.Module:
     except TypeError:
         model = getattr(tvm, arch_id)(pretrained=pretrained)
 
-    # Replace final layer with regression head
+    # Replace final layer with output head
     if arch_id.startswith("resnet"):
         in_features = model.fc.in_features
-        model.fc = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, 1))
+        model.fc = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, num_outputs))
 
     elif arch_id.startswith("vgg"):
         in_features = model.classifier[-1].in_features
-        model.classifier[-1] = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, 1))
+        model.classifier[-1] = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, num_outputs))
 
     elif arch_id.startswith("densenet"):
         in_features = model.classifier.in_features
-        model.classifier = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, 1))
+        model.classifier = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, num_outputs))
 
     elif arch_id.startswith("mobilenet"):
         in_features = model.classifier[-1].in_features
-        model.classifier[-1] = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, 1))
+        model.classifier[-1] = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, num_outputs))
 
     elif arch_id.startswith("efficientnet"):
         in_features = model.classifier[-1].in_features
-        model.classifier[-1] = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, 1))
+        model.classifier[-1] = nn.Sequential(nn.Dropout(dropout), nn.Linear(in_features, num_outputs))
 
     else:
         raise ValueError(f"Unsupported architecture: {arch_id}")
@@ -103,7 +103,7 @@ def _unfreeze_last_n_layers(model, n):
         p.requires_grad = True
 
 
-def _build_scratch(cfg: dict) -> nn.Module:
+def _build_scratch(cfg: dict, num_outputs: int = 1) -> nn.Module:
     num_blocks = int(cfg.get("num_conv_blocks", 4))
     base_filters = int(cfg.get("base_filters", 32))
     fc_layers = cfg.get("fc_layers", [256, 128])
@@ -129,7 +129,7 @@ def _build_scratch(cfg: dict) -> nn.Module:
         fc_head_layers.append(nn.ReLU(inplace=True))
         fc_head_layers.append(nn.Dropout(dropout))
         fc_in = int(neurons)
-    fc_head_layers.append(nn.Linear(fc_in, 1))
+    fc_head_layers.append(nn.Linear(fc_in, num_outputs))
 
     return nn.Sequential(conv_body, *fc_head_layers)
 

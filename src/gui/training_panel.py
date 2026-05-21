@@ -297,7 +297,11 @@ class TrainingPanel(QWidget):
         self.lbl_test_loss  = _metric_label("Test Loss",  "—")
         self.lbl_test_rmse  = _metric_label("Test RMSE",  "—")
         self.lbl_test_mae   = _metric_label("Test MAE",   "—")
-        for w in (self.lbl_train_loss, self.lbl_test_loss, self.lbl_test_rmse, self.lbl_test_mae):
+        self.lbl_test_acc   = _metric_label("Test Acc",   "—")
+        self.lbl_test_f1    = _metric_label("Test F1",    "—")
+        for w in (self.lbl_train_loss, self.lbl_test_loss,
+                  self.lbl_test_rmse, self.lbl_test_mae,
+                  self.lbl_test_acc, self.lbl_test_f1):
             metrics_h.addWidget(w)
         rv.addWidget(metrics_grp)
 
@@ -358,6 +362,7 @@ class TrainingPanel(QWidget):
             worker.run_started.connect(self._on_gs_run_started)
             worker.run_progress.connect(self._on_gs_progress)
             worker.run_finished.connect(self._on_gs_run_finished)
+            worker.epoch_metrics.connect(self._on_epoch_metrics)
             worker.all_done.connect(self._on_all_done)
             worker.error.connect(self._on_error)
             self.lbl_status.setText("Grid search running…")
@@ -391,11 +396,15 @@ class TrainingPanel(QWidget):
     def _on_epoch_metrics(self, m: dict):
         self.lbl_train_loss.findChild(QLabel, "value").setText(f"{m.get('train_loss', 0):.4f}")
         tl = m.get("test_loss")
-        self.lbl_test_loss.findChild(QLabel, "value").setText(f"{tl:.4f}" if tl else "—")
+        self.lbl_test_loss.findChild(QLabel, "value").setText(f"{tl:.4f}" if tl is not None else "—")
         tr = m.get("test_rmse")
-        self.lbl_test_rmse.findChild(QLabel, "value").setText(f"{tr:.4f}" if tr else "—")
+        self.lbl_test_rmse.findChild(QLabel, "value").setText(f"{tr:.4f}" if tr is not None else "—")
         tm = m.get("test_mae")
-        self.lbl_test_mae.findChild(QLabel, "value").setText(f"{tm:.4f}" if tm else "—")
+        self.lbl_test_mae.findChild(QLabel, "value").setText(f"{tm:.4f}" if tm is not None else "—")
+        ta = m.get("test_accuracy")
+        self.lbl_test_acc.findChild(QLabel, "value").setText(f"{ta:.3f}" if ta is not None else "—")
+        tf = m.get("test_f1")
+        self.lbl_test_f1.findChild(QLabel, "value").setText(f"{tf:.3f}" if tf is not None else "—")
 
     def _on_gs_run_started(self, run_num: int, total: int, params: dict):
         self.lbl_run_progress.setText(f"Run {run_num} / {total}")
@@ -433,7 +442,9 @@ class TrainingPanel(QWidget):
             mw.receive_training_results(results)
 
     def _reset_metrics(self):
-        for w in (self.lbl_train_loss, self.lbl_test_loss, self.lbl_test_rmse, self.lbl_test_mae):
+        for w in (self.lbl_train_loss, self.lbl_test_loss,
+                  self.lbl_test_rmse, self.lbl_test_mae,
+                  self.lbl_test_acc, self.lbl_test_f1):
             vl = w.findChild(QLabel, "value")
             if vl:
                 vl.setText("—")

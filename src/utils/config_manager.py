@@ -42,6 +42,14 @@ def default_config() -> dict:
                 },
             },
         },
+        "classification": {
+            "enabled": False,
+            "classes": [
+                {"name": "Bad",        "max": 20.0},
+                {"name": "Acceptable", "max": 40.0},
+                {"name": "Good",       "max": None},
+            ],
+        },
         "model": {
             "mode": "transfer",
             "transfer": {

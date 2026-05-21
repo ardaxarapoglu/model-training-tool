@@ -6,20 +6,30 @@ import csv
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"}
 
 
-def export_labels(experiments: list, output_path: str) -> int:
+def export_labels(experiments: list, output_path: str, class_cfg: dict = None) -> int:
     """Write a label CSV.  Returns the number of rows written."""
-    rows = _build_rows(experiments)
+    use_cls = class_cfg and class_cfg.get("enabled", False)
+    classes = class_cfg.get("classes", []) if use_cls else []
+    fieldnames = ["image_path", "experiment", "time_frame", "pb_concentration", "split"]
+    if use_cls:
+        fieldnames.append("class_label")
+    rows = _build_rows(experiments, classes if use_cls else None)
     with open(output_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(
-            f,
-            fieldnames=["image_path", "experiment", "time_frame", "pb_concentration", "split"],
-        )
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
     return len(rows)
 
 
-def _build_rows(experiments: list) -> list:
+def _pb_to_class(pb: float, classes: list) -> int:
+    for i, cls in enumerate(classes[:-1]):
+        max_val = cls.get("max")
+        if max_val is not None and pb < float(max_val):
+            return i
+    return len(classes) - 1
+
+
+def _build_rows(experiments: list, classes: list = None) -> list:
     rows = []
     for exp in experiments:
         exp_id = exp.get("id", "")
@@ -31,15 +41,16 @@ def _build_rows(experiments: list) -> list:
             pb = tf.get("pb_concentration", 0.0)
             for fname in sorted(os.listdir(folder)):
                 if os.path.splitext(fname)[1].lower() in IMAGE_EXTS:
-                    rows.append(
-                        {
-                            "image_path": os.path.join(folder, fname),
-                            "experiment": exp_id,
-                            "time_frame": tf.get("name", ""),
-                            "pb_concentration": pb,
-                            "split": split,
-                        }
-                    )
+                    row = {
+                        "image_path": os.path.join(folder, fname),
+                        "experiment": exp_id,
+                        "time_frame": tf.get("name", ""),
+                        "pb_concentration": pb,
+                        "split": split,
+                    }
+                    if classes:
+                        row["class_label"] = _pb_to_class(float(pb), classes)
+                    rows.append(row)
     return rows
 
 

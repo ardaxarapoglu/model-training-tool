@@ -3,10 +3,11 @@ from qtpy.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox,
     QLabel, QCheckBox, QComboBox, QSpinBox, QDoubleSpinBox,
     QRadioButton, QButtonGroup, QStackedWidget, QScrollArea,
-    QFrame, QLineEdit, QSizePolicy,
+    QFrame, QLineEdit, QSizePolicy, QTableWidget, QTableWidgetItem,
+    QPushButton, QHeaderView,
 )
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QFont
+from qtpy.QtGui import QFont, QColor
 
 from ..core.model_builder import ARCHITECTURES
 
@@ -30,7 +31,61 @@ class ModelPanel(QWidget):
         cv = QVBoxLayout(container)
         cv.setSpacing(10)
 
-        # ---- Mode selector ----
+        # ---- Classification / Regression selector ----
+        grp_out = QGroupBox("Output Mode")
+        cv.addWidget(grp_out)
+        out_v = QVBoxLayout(grp_out)
+
+        out_mode_row = QHBoxLayout()
+        self.rb_regression = QRadioButton("Regression  (predict Pb% as a continuous value)")
+        self.rb_classify   = QRadioButton("Classification  (predict a named category)")
+        self.rb_regression.setChecked(True)
+        bg_out = QButtonGroup(self)
+        bg_out.addButton(self.rb_regression)
+        bg_out.addButton(self.rb_classify)
+        out_mode_row.addWidget(self.rb_regression)
+        out_mode_row.addWidget(self.rb_classify)
+        out_mode_row.addStretch()
+        out_v.addLayout(out_mode_row)
+
+        self.cls_editor = QWidget()
+        ce_v = QVBoxLayout(self.cls_editor)
+        ce_v.setContentsMargins(0, 4, 0, 0)
+        ce_v.setSpacing(4)
+
+        info_lbl = QLabel(
+            "Define classes in order of increasing Pb%.  "
+            "The last class has no upper bound and catches all remaining values."
+        )
+        info_lbl.setWordWrap(True)
+        info_lbl.setStyleSheet("color:#555;font-size:11px;")
+        ce_v.addWidget(info_lbl)
+
+        self.tbl_classes = QTableWidget(0, 2)
+        self.tbl_classes.setHorizontalHeaderLabels(["Class Name", "Upper Bound (%)"])
+        self.tbl_classes.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.tbl_classes.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.tbl_classes.setMaximumHeight(160)
+        self.tbl_classes.verticalHeader().setVisible(False)
+        ce_v.addWidget(self.tbl_classes)
+
+        cls_btn_row = QHBoxLayout()
+        btn_add_cls = QPushButton("+ Add Class")
+        btn_add_cls.clicked.connect(self._add_class_row)
+        btn_rm_cls  = QPushButton("- Remove Last")
+        btn_rm_cls.clicked.connect(self._remove_class_row)
+        cls_btn_row.addWidget(btn_add_cls)
+        cls_btn_row.addWidget(btn_rm_cls)
+        cls_btn_row.addStretch()
+        ce_v.addLayout(cls_btn_row)
+
+        out_v.addWidget(self.cls_editor)
+        self.cls_editor.setVisible(False)
+        self.rb_classify.toggled.connect(self.cls_editor.setVisible)
+
+        self._init_default_classes()
+
+        # ---- Training Mode selector ----
         grp_mode = QGroupBox("Training Mode")
         cv.addWidget(grp_mode)
         mode_v = QVBoxLayout(grp_mode)
@@ -163,12 +218,58 @@ class ModelPanel(QWidget):
     def _on_mode_changed(self, transfer: bool):
         self.stack.setCurrentIndex(0 if transfer else 1)
 
+    # ---------------------------------------------------------------- class editor helpers
+    def _init_default_classes(self):
+        self._set_classes([
+            {"name": "Bad",        "max": 20.0},
+            {"name": "Acceptable", "max": 40.0},
+            {"name": "Good",       "max": None},
+        ])
+
+    def _add_class_row(self):
+        n = self.tbl_classes.rowCount()
+        # Insert before last "∞" row
+        self.tbl_classes.insertRow(n - 1)
+        self.tbl_classes.setItem(n - 1, 0, QTableWidgetItem(f"Class {n}"))
+        self.tbl_classes.setItem(n - 1, 1, QTableWidgetItem("50"))
+
+    def _remove_class_row(self):
+        n = self.tbl_classes.rowCount()
+        if n <= 2:
+            return
+        self.tbl_classes.removeRow(n - 2)
+
+    def _get_classes(self) -> list:
+        classes = []
+        for row in range(self.tbl_classes.rowCount()):
+            name_item  = self.tbl_classes.item(row, 0)
+            bound_item = self.tbl_classes.item(row, 1)
+            name = name_item.text().strip() if name_item else f"Class {row + 1}"
+            bound_text = (bound_item.text() if bound_item else "∞").strip()
+            try:
+                max_val = None if bound_text in ("∞", "", "inf") else float(bound_text)
+            except ValueError:
+                max_val = None
+            classes.append({"name": name, "max": max_val})
+        return classes
+
+    def _set_classes(self, classes: list):
+        self.tbl_classes.setRowCount(len(classes))
+        for row, cls in enumerate(classes):
+            name    = cls.get("name", f"Class {row + 1}")
+            max_val = cls.get("max")
+            bound_text = "∞" if max_val is None else str(max_val)
+            self.tbl_classes.setItem(row, 0, QTableWidgetItem(name))
+            item = QTableWidgetItem(bound_text)
+            if max_val is None:
+                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                item.setForeground(QColor("#888888"))
+            self.tbl_classes.setItem(row, 1, item)
+
     # ---------------------------------------------------------------- public API
     def get_config(self) -> dict:
-        mode = "transfer" if self.rb_transfer.isChecked() else "scratch"
-        arch_vals = [v.strip() for v in self.edit_arch_values.text().split(",") if v.strip()]
         return {
-            "mode": mode,
+            "mode": "transfer" if self.rb_transfer.isChecked() else "scratch",
             "transfer": {
                 "architecture": self.cmb_arch.currentText(),
                 "pretrained": self.chk_pretrained.isChecked(),
@@ -187,6 +288,10 @@ class ModelPanel(QWidget):
                 "fc_layers": _parse_ints(self.edit_fc_layers.text(), [256, 128]),
                 "batch_norm": self.chk_batch_norm.isChecked(),
                 "dropout": self.sp_dropout_s.value(),
+            },
+            "classification": {
+                "enabled": self.rb_classify.isChecked(),
+                "classes": self._get_classes(),
             },
         }
 
@@ -217,6 +322,13 @@ class ModelPanel(QWidget):
         self.edit_fc_layers.setText(", ".join(str(v) for v in sc.get("fc_layers", [256, 128])))
         self.chk_batch_norm.setChecked(sc.get("batch_norm", True))
         self.sp_dropout_s.setValue(float(sc.get("dropout", 0.5)))
+
+        cls_cfg = cfg.get("classification", {})
+        is_cls = cls_cfg.get("enabled", False)
+        self.rb_classify.setChecked(is_cls)
+        self.rb_regression.setChecked(not is_cls)
+        if cls_cfg.get("classes"):
+            self._set_classes(cls_cfg["classes"])
 
 
 def _parse_ints(text, default):

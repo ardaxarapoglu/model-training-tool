@@ -41,16 +41,12 @@ def parse_experiment_form(xlsx_path: str) -> dict:
         ws = wb["Kinetik_Numuneler"]
         # Y1–Y7 are in fixed rows 8–14; Pb Tenörü (%) is column D (index 4 in 1-based, cell D8:D14)
         for excel_row in range(8, 15):  # rows 8, 9, 10, 11, 12, 13, 14
-            name      = ws.cell(excel_row, 1).value  # col A
-            interval  = ws.cell(excel_row, 2).value  # col B
-            pb_grade  = ws.cell(excel_row, 4).value  # col D  ← Pb Tenörü (%)
-            pb_dist   = ws.cell(excel_row, 5).value  # col E  ← Pb Dağılım (%)
+            name     = ws.cell(excel_row, 1).value  # col A
+            pb_grade = ws.cell(excel_row, 4).value  # col D  ← Pb Tenörü (%)
             result["time_frames"].append(
                 {
                     "name": str(name) if name is not None else f"Y{excel_row - 7}",
-                    "time_interval": str(interval) if interval is not None else "",
                     "pb_concentration": float(pb_grade) if pb_grade is not None else 0.0,
-                    "pb_distribution": float(pb_dist) if pb_dist is not None else 0.0,
                     "folder_path": "",
                     "notes": "",
                 }
@@ -97,9 +93,7 @@ def discover_experiments(forms_dir: str, frames_dir: str) -> list:
                 info["time_frames"].append(
                     {
                         "name": yn,
-                        "time_interval": "",
                         "pb_concentration": 0.0,
-                        "pb_distribution": 0.0,
                         "folder_path": "",
                         "notes": "",
                     }

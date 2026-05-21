@@ -3,6 +3,7 @@ import os
 import time
 import math
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -19,10 +20,10 @@ OPTIMIZERS = {
     "RMSprop": torch.optim.RMSprop,
 }
 
-LOSSES = {
-    "MSE":   nn.MSELoss(),
-    "MAE":   nn.L1Loss(),
-    "Huber": nn.HuberLoss(),
+REGRESSION_LOSSES = {
+    "MSE":      nn.MSELoss(),
+    "MAE":      nn.L1Loss(),
+    "Huber":    nn.HuberLoss(),
     "SmoothL1": nn.SmoothL1Loss(),
 }
 
@@ -59,6 +60,11 @@ class TrainingWorker(QThread):
         prep_cfg = cfg["preprocessing"]
         model_cfg = cfg["model"]
         experiments = cfg["experiments"]
+        class_cfg = cfg.get("classification", {"enabled": False, "classes": []})
+
+        is_cls = class_cfg.get("enabled", False)
+        classes = class_cfg.get("classes", []) if is_cls else []
+        num_outputs = len(classes) if is_cls else 1
 
         # Resolve grid-search overrides
         resolved = self._resolve_params(t_cfg, self.run_params)
@@ -78,20 +84,25 @@ class TrainingWorker(QThread):
             eff_model_cfg["transfer"] = dict(model_cfg.get("transfer", {}))
             eff_model_cfg["transfer"]["architecture"] = self.run_params["architecture"]
 
-        self.log.emit(f"[{self.run_id}] Building model…")
-        model = build_model(eff_model_cfg)
+        mode_label = "classification" if is_cls else "regression"
+        self.log.emit(f"[{self.run_id}] Building model… (mode={mode_label}, outputs={num_outputs})")
+        model = build_model(eff_model_cfg, num_outputs=num_outputs)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         n_params = count_trainable_params(model)
         self.log.emit(f"[{self.run_id}] Device: {device} | Trainable params: {n_params:,}")
 
+        if is_cls:
+            class_names = [c.get("name", str(i)) for i, c in enumerate(classes)]
+            self.log.emit(f"[{self.run_id}] Classes: {class_names}")
+
         # Datasets
         train_tf = build_transform(prep_cfg, augment=True)
         eval_tf = build_transform(prep_cfg, augment=False)
 
-        train_samples = collect_samples(experiments, "train")
-        test_samples = collect_samples(experiments, "test")
-        val_samples = collect_samples(experiments, "validation")
+        train_samples = collect_samples(experiments, "train", class_cfg)
+        test_samples = collect_samples(experiments, "test", class_cfg)
+        val_samples = collect_samples(experiments, "validation", class_cfg)
 
         if not train_samples:
             raise ValueError("No training images found. Check experiment folder paths.")
@@ -113,7 +124,22 @@ class TrainingWorker(QThread):
         val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers) if val_ds else None
 
         # Loss
-        criterion = LOSSES.get(loss_name, nn.MSELoss())
+        if is_cls:
+            # Compute class weights from training set (inverse frequency)
+            counts = [0] * num_outputs
+            for _, lbl in train_samples:
+                counts[int(lbl)] += 1
+            weights = torch.tensor(
+                [1.0 / (c + 1e-6) for c in counts], dtype=torch.float32
+            )
+            weights = weights / weights.sum() * num_outputs
+            criterion = nn.CrossEntropyLoss(weight=weights.to(device))
+            self.log.emit(
+                f"[{self.run_id}] CrossEntropyLoss | class counts: {counts} | "
+                f"weights: {[f'{w:.3f}' for w in weights.tolist()]}"
+            )
+        else:
+            criterion = REGRESSION_LOSSES.get(loss_name, nn.MSELoss())
 
         # Optimizer
         opt_cls = OPTIMIZERS.get(opt_name, torch.optim.Adam)
@@ -141,36 +167,43 @@ class TrainingWorker(QThread):
 
         # Training loop
         train_history, test_history = [], []
-        best_test_loss = math.inf
+        best_monitor = math.inf   # lower-is-better (loss); for cls we negate accuracy
         no_improve = 0
         best_epoch = 0
         start_time = time.time()
+
+        _train_fn = _train_epoch_cls if is_cls else _train_epoch_reg
+        _eval_fn  = _eval_epoch_cls  if is_cls else _eval_epoch_reg
 
         for epoch in range(1, epochs + 1):
             if self._stop:
                 self.log.emit(f"[{self.run_id}] Stopped by user at epoch {epoch}.")
                 break
 
-            train_loss = _train_epoch(model, train_loader, optimizer, criterion, device)
+            train_loss = _train_fn(model, train_loader, optimizer, criterion, device)
             train_history.append(train_loss)
 
-            monitor_loss = train_loss
+            monitor_val = train_loss
             test_metrics_ep = {}
             if test_loader:
-                test_metrics_ep = _eval_epoch(model, test_loader, criterion, device)
+                test_metrics_ep = _eval_fn(model, test_loader, criterion, device, num_outputs)
                 test_history.append(test_metrics_ep["loss"])
-                monitor_loss = test_metrics_ep["loss"]
+                if is_cls:
+                    # Higher accuracy = better; negate so lower-is-better logic works
+                    monitor_val = -test_metrics_ep.get("accuracy", 0.0)
+                else:
+                    monitor_val = test_metrics_ep["loss"]
             else:
                 test_history.append(None)
 
             if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                scheduler.step(monitor_loss)
+                scheduler.step(monitor_val)
             elif scheduler is not None:
                 scheduler.step()
 
             # Save best
-            if monitor_loss < best_test_loss - es_min_delta:
-                best_test_loss = monitor_loss
+            if monitor_val < best_monitor - es_min_delta:
+                best_monitor = monitor_val
                 best_epoch = epoch
                 no_improve = 0
                 torch.save(model.state_dict(), best_ckpt)
@@ -179,21 +212,34 @@ class TrainingWorker(QThread):
 
             current_lr = optimizer.param_groups[0]["lr"]
             self.progress.emit(epoch, epochs)
+
             metrics_payload = {
                 "epoch": epoch,
                 "train_loss": train_loss,
                 "test_loss": test_metrics_ep.get("loss"),
-                "test_rmse": test_metrics_ep.get("rmse"),
-                "test_mae": test_metrics_ep.get("mae"),
                 "lr": current_lr,
             }
+            if is_cls:
+                metrics_payload["test_accuracy"] = test_metrics_ep.get("accuracy")
+                metrics_payload["test_f1"] = test_metrics_ep.get("f1")
+                self.log.emit(
+                    f"[{self.run_id}] Ep {epoch}/{epochs} | "
+                    f"train_loss={train_loss:.4f} | "
+                    f"test_loss={test_metrics_ep.get('loss', '-')!s:.6} | "
+                    f"acc={test_metrics_ep.get('accuracy', 0):.3f} | "
+                    f"lr={current_lr:.2e}"
+                )
+            else:
+                metrics_payload["test_rmse"] = test_metrics_ep.get("rmse")
+                metrics_payload["test_mae"] = test_metrics_ep.get("mae")
+                self.log.emit(
+                    f"[{self.run_id}] Ep {epoch}/{epochs} | "
+                    f"train_loss={train_loss:.4f} | "
+                    f"test_loss={test_metrics_ep.get('loss', '-')!s:.6} | "
+                    f"lr={current_lr:.2e}"
+                )
+
             self.epoch_metrics.emit(metrics_payload)
-            self.log.emit(
-                f"[{self.run_id}] Ep {epoch}/{epochs} | "
-                f"train_loss={train_loss:.4f} | "
-                f"test_loss={test_metrics_ep.get('loss', '-')!s:.6} | "
-                f"lr={current_lr:.2e}"
-            )
 
             if es_enabled and no_improve >= es_patience:
                 self.log.emit(f"[{self.run_id}] Early stopping at epoch {epoch} (no improve for {es_patience} epochs).")
@@ -206,22 +252,30 @@ class TrainingWorker(QThread):
         if os.path.exists(best_ckpt):
             model.load_state_dict(torch.load(best_ckpt, map_location=device))
         if test_loader:
-            final_test_metrics = _eval_epoch(model, test_loader, criterion, device)
+            final_test_metrics = _eval_fn(model, test_loader, criterion, device, num_outputs)
 
         # Validation eval — done ONCE after training is fully complete
         # (never used for early stopping or hyperparameter selection)
         final_val_metrics = {}
         if val_loader:
             self.log.emit(f"[{self.run_id}] Final evaluation on validation set (held-out)…")
-            final_val_metrics = _eval_epoch(model, val_loader, criterion, device)
-            self.log.emit(
-                f"[{self.run_id}] VAL RMSE={final_val_metrics.get('rmse', '?'):.4f} | "
-                f"MAE={final_val_metrics.get('mae', '?'):.4f} | "
-                f"R²={final_val_metrics.get('r2', '?'):.4f}"
-            )
+            final_val_metrics = _eval_fn(model, val_loader, criterion, device, num_outputs)
+            if is_cls:
+                self.log.emit(
+                    f"[{self.run_id}] VAL acc={final_val_metrics.get('accuracy', 0):.4f} | "
+                    f"F1={final_val_metrics.get('f1', 0):.4f}"
+                )
+            else:
+                self.log.emit(
+                    f"[{self.run_id}] VAL RMSE={final_val_metrics.get('rmse', 0):.4f} | "
+                    f"MAE={final_val_metrics.get('mae', 0):.4f} | "
+                    f"R²={final_val_metrics.get('r2', 0):.4f}"
+                )
 
         return {
             "run_id": self.run_id,
+            "mode": mode_label,
+            "class_names": [c.get("name", str(i)) for i, c in enumerate(classes)] if is_cls else [],
             "params": {**resolved, **self.run_params},
             "train_history": train_history,
             "test_history": test_history,
@@ -256,7 +310,7 @@ class TrainingWorker(QThread):
 
 # ---------------------------------------------------------------------------
 
-def _train_epoch(model, loader, optimizer, criterion, device):
+def _train_epoch_reg(model, loader, optimizer, criterion, device):
     model.train()
     total_loss = 0.0
     for imgs, labels in loader:
@@ -270,8 +324,7 @@ def _train_epoch(model, loader, optimizer, criterion, device):
     return total_loss / len(loader.dataset)
 
 
-def _eval_epoch(model, loader, criterion, device):
-    import numpy as np
+def _eval_epoch_reg(model, loader, criterion, device, _num_outputs=1):
     model.eval()
     all_preds, all_labels = [], []
     total_loss = 0.0
@@ -301,6 +354,62 @@ def _eval_epoch(model, loader, criterion, device):
         "mae": mae,
         "r2": r2,
     }
+
+
+def _train_epoch_cls(model, loader, optimizer, criterion, device):
+    model.train()
+    total_loss = 0.0
+    for imgs, labels in loader:
+        imgs, labels = imgs.to(device), labels.to(device)
+        optimizer.zero_grad()
+        logits = model(imgs)
+        loss = criterion(logits, labels)
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item() * len(imgs)
+    return total_loss / len(loader.dataset)
+
+
+def _eval_epoch_cls(model, loader, criterion, device, num_classes):
+    model.eval()
+    all_preds, all_labels = [], []
+    total_loss = 0.0
+    with torch.no_grad():
+        for imgs, labels in loader:
+            imgs, labels = imgs.to(device), labels.to(device)
+            logits = model(imgs)
+            loss = criterion(logits, labels)
+            total_loss += loss.item() * len(imgs)
+            preds = logits.argmax(dim=1)
+            all_preds.extend(preds.cpu().numpy().tolist())
+            all_labels.extend(labels.cpu().numpy().tolist())
+
+    p = np.array(all_preds)
+    y = np.array(all_labels)
+    n = len(y)
+    accuracy = float((p == y).mean()) if n > 0 else 0.0
+    f1 = _macro_f1(p, y, num_classes)
+
+    return {
+        "loss": total_loss / n if n > 0 else 0.0,
+        "accuracy": accuracy,
+        "f1": f1,
+        "predictions": all_preds,    # stored for confusion matrix
+        "true_labels": all_labels,
+    }
+
+
+def _macro_f1(preds: np.ndarray, labels: np.ndarray, num_classes: int) -> float:
+    f1s = []
+    for c in range(num_classes):
+        tp = int(((preds == c) & (labels == c)).sum())
+        fp = int(((preds == c) & (labels != c)).sum())
+        fn = int(((preds != c) & (labels == c)).sum())
+        precision = tp / (tp + fp + 1e-8)
+        recall = tp / (tp + fn + 1e-8)
+        f1 = 2 * precision * recall / (precision + recall + 1e-8)
+        f1s.append(f1)
+    return float(np.mean(f1s))
 
 
 def _build_scheduler(optimizer, cfg: dict):
