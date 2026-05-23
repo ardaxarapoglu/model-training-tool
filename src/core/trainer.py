@@ -77,15 +77,25 @@ class TrainingWorker(QThread):
         loss_name = resolved["loss"]
         num_workers = int(t_cfg.get("num_workers", 0))
 
-        # Model (allow architecture override from grid-search)
+        # Architecture and transfer settings now live in t_cfg (moved from model_cfg)
+        arch_name       = resolved.get("architecture", "ResNet-50")
+        pretrained      = bool(t_cfg.get("pretrained", True))
+        freeze_backbone = bool(t_cfg.get("freeze_backbone", False))
+        unfreeze_last_n = int(t_cfg.get("unfreeze_last_n", 0))
+        dropout_head    = float(t_cfg.get("dropout_head", 0.5))
+
         eff_model_cfg = dict(model_cfg)
-        if "architecture" in self.run_params and model_cfg.get("mode") == "transfer":
-            eff_model_cfg = dict(model_cfg)
-            eff_model_cfg["transfer"] = dict(model_cfg.get("transfer", {}))
-            eff_model_cfg["transfer"]["architecture"] = self.run_params["architecture"]
+        if model_cfg.get("mode") == "transfer":
+            eff_model_cfg["transfer"] = {
+                "architecture": arch_name,
+                "pretrained": pretrained,
+                "freeze_backbone": freeze_backbone,
+                "unfreeze_last_n": unfreeze_last_n,
+                "dropout": dropout_head,
+            }
 
         mode_label = "classification" if is_cls else "regression"
-        self.log.emit(f"[{self.run_id}] Building model… (mode={mode_label}, outputs={num_outputs})")
+        self.log.emit(f"[{self.run_id}] Building model… (arch={arch_name}, mode={mode_label}, outputs={num_outputs})")
         model = build_model(eff_model_cfg, num_outputs=num_outputs)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
@@ -106,23 +116,25 @@ class TrainingWorker(QThread):
         train_tf = build_transform(prep_cfg, augment=True)
         eval_tf = build_transform(prep_cfg, augment=False)
 
-        train_samples = collect_samples(experiments, "train", class_cfg)
-        test_samples = collect_samples(experiments, "test", class_cfg)
-        val_samples = collect_samples(experiments, "validation", class_cfg)
+        # "validation" split → monitored during training (early stopping, LR scheduling)
+        # "test" split      → held out, evaluated exactly once after training ends
+        train_samples = collect_samples(experiments, "train",      class_cfg)
+        val_samples   = collect_samples(experiments, "validation", class_cfg)  # monitored
+        test_samples  = collect_samples(experiments, "test",       class_cfg)  # held out
 
         if not train_samples:
             raise ValueError("No training images found. Check experiment folder paths.")
-        if not test_samples:
-            self.log.emit(f"[{self.run_id}] WARNING: No test images found. Using train loss for early stopping.")
+        if not val_samples:
+            self.log.emit(f"[{self.run_id}] WARNING: No validation images found. Using train loss for early stopping.")
 
         self.log.emit(
             f"[{self.run_id}] Samples — train: {len(train_samples)}, "
-            f"test: {len(test_samples)}, val: {len(val_samples)} (held out)"
+            f"val: {len(val_samples)} (monitored), test: {len(test_samples)} (held out)"
         )
 
         train_ds = FrothDataset(train_samples, train_tf)
-        test_ds = FrothDataset(test_samples, eval_tf) if test_samples else None
-        val_ds = FrothDataset(val_samples, eval_tf) if val_samples else None
+        val_ds   = FrothDataset(val_samples,   eval_tf) if val_samples  else None  # monitored
+        test_ds  = FrothDataset(test_samples,  eval_tf) if test_samples else None  # held out
 
         pin_mem = device.type == "cuda"
         use_amp = t_cfg.get("use_amp", False) and device.type == "cuda"
@@ -132,13 +144,14 @@ class TrainingWorker(QThread):
         train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
                                   num_workers=num_workers, pin_memory=pin_mem,
                                   persistent_workers=(num_workers > 0))
-        test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False,
-                                 num_workers=num_workers, pin_memory=pin_mem,
-                                 persistent_workers=(num_workers > 0)) if test_ds else None
-        # val_loader is never used during training loop
+        # val_loader is used DURING the training loop (early stopping / LR scheduling)
         val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False,
                                 num_workers=num_workers, pin_memory=pin_mem,
                                 persistent_workers=(num_workers > 0)) if val_ds else None
+        # test_loader is NEVER touched during the training loop
+        test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False,
+                                 num_workers=num_workers, pin_memory=pin_mem,
+                                 persistent_workers=(num_workers > 0)) if test_ds else None
 
         scaler = torch.cuda.amp.GradScaler() if use_amp else None
 
@@ -185,7 +198,9 @@ class TrainingWorker(QThread):
         best_ckpt = os.path.join(run_dir, "best_model.pt")
 
         # Training loop
-        train_history, test_history = [], []
+        # val_loader (validation split) is monitored each epoch for early stopping / scheduling
+        # test_loader (test split) is NEVER touched here
+        train_history, val_history = [], []
         best_monitor = math.inf   # lower-is-better (loss); for cls we negate accuracy
         no_improve = 0
         best_epoch = 0
@@ -203,24 +218,23 @@ class TrainingWorker(QThread):
             train_history.append(train_loss)
 
             monitor_val = train_loss
-            test_metrics_ep = {}
-            if test_loader:
-                test_metrics_ep = _eval_fn(model, test_loader, criterion, device, num_outputs)
-                test_history.append(test_metrics_ep["loss"])
+            val_metrics_ep = {}
+            if val_loader:
+                val_metrics_ep = _eval_fn(model, val_loader, criterion, device, num_outputs)
+                val_history.append(val_metrics_ep["loss"])
                 if is_cls:
-                    # Higher accuracy = better; negate so lower-is-better logic works
-                    monitor_val = -test_metrics_ep.get("accuracy", 0.0)
+                    monitor_val = -val_metrics_ep.get("accuracy", 0.0)
                 else:
-                    monitor_val = test_metrics_ep["loss"]
+                    monitor_val = val_metrics_ep["loss"]
             else:
-                test_history.append(None)
+                val_history.append(None)
 
             if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 scheduler.step(monitor_val)
             elif scheduler is not None:
                 scheduler.step()
 
-            # Save best
+            # Save best checkpoint
             if monitor_val < best_monitor - es_min_delta:
                 best_monitor = monitor_val
                 best_epoch = epoch
@@ -235,26 +249,26 @@ class TrainingWorker(QThread):
             metrics_payload = {
                 "epoch": epoch,
                 "train_loss": train_loss,
-                "test_loss": test_metrics_ep.get("loss"),
+                "val_loss": val_metrics_ep.get("loss"),
                 "lr": current_lr,
             }
             if is_cls:
-                metrics_payload["test_accuracy"] = test_metrics_ep.get("accuracy")
-                metrics_payload["test_f1"] = test_metrics_ep.get("f1")
+                metrics_payload["val_accuracy"] = val_metrics_ep.get("accuracy")
+                metrics_payload["val_f1"] = val_metrics_ep.get("f1")
                 self.log.emit(
                     f"[{self.run_id}] Ep {epoch}/{epochs} | "
-                    f"train_loss={train_loss:.4f} | "
-                    f"test_loss={test_metrics_ep.get('loss', '-')!s:.6} | "
-                    f"acc={test_metrics_ep.get('accuracy', 0):.3f} | "
+                    f"train={train_loss:.4f} | "
+                    f"val_loss={val_metrics_ep.get('loss', '-')!s:.6} | "
+                    f"val_acc={val_metrics_ep.get('accuracy', 0):.3f} | "
                     f"lr={current_lr:.2e}"
                 )
             else:
-                metrics_payload["test_rmse"] = test_metrics_ep.get("rmse")
-                metrics_payload["test_mae"] = test_metrics_ep.get("mae")
+                metrics_payload["val_rmse"] = val_metrics_ep.get("rmse")
+                metrics_payload["val_mae"] = val_metrics_ep.get("mae")
                 self.log.emit(
                     f"[{self.run_id}] Ep {epoch}/{epochs} | "
-                    f"train_loss={train_loss:.4f} | "
-                    f"test_loss={test_metrics_ep.get('loss', '-')!s:.6} | "
+                    f"train={train_loss:.4f} | "
+                    f"val_loss={val_metrics_ep.get('loss', '-')!s:.6} | "
                     f"lr={current_lr:.2e}"
                 )
 
@@ -266,29 +280,30 @@ class TrainingWorker(QThread):
 
         elapsed = time.time() - start_time
 
-        # Load best checkpoint for final eval
-        final_test_metrics = {}
+        # Load best checkpoint
         if os.path.exists(best_ckpt):
             model.load_state_dict(torch.load(best_ckpt, map_location=device))
-        if test_loader:
-            final_test_metrics = _eval_fn(model, test_loader, criterion, device, num_outputs)
 
-        # Validation eval — done ONCE after training is fully complete
-        # (never used for early stopping or hyperparameter selection)
+        # Final eval on validation set (the monitoring split)
         final_val_metrics = {}
         if val_loader:
-            self.log.emit(f"[{self.run_id}] Final evaluation on validation set (held-out)…")
             final_val_metrics = _eval_fn(model, val_loader, criterion, device, num_outputs)
+
+        # Final eval on test set (held-out) — done ONCE, never during training loop
+        final_test_metrics = {}
+        if test_loader:
+            self.log.emit(f"[{self.run_id}] Final evaluation on held-out test set…")
+            final_test_metrics = _eval_fn(model, test_loader, criterion, device, num_outputs)
             if is_cls:
                 self.log.emit(
-                    f"[{self.run_id}] VAL acc={final_val_metrics.get('accuracy', 0):.4f} | "
-                    f"F1={final_val_metrics.get('f1', 0):.4f}"
+                    f"[{self.run_id}] TEST acc={final_test_metrics.get('accuracy', 0):.4f} | "
+                    f"F1={final_test_metrics.get('f1', 0):.4f}"
                 )
             else:
                 self.log.emit(
-                    f"[{self.run_id}] VAL RMSE={final_val_metrics.get('rmse', 0):.4f} | "
-                    f"MAE={final_val_metrics.get('mae', 0):.4f} | "
-                    f"R²={final_val_metrics.get('r2', 0):.4f}"
+                    f"[{self.run_id}] TEST RMSE={final_test_metrics.get('rmse', 0):.4f} | "
+                    f"MAE={final_test_metrics.get('mae', 0):.4f} | "
+                    f"R²={final_test_metrics.get('r2', 0):.4f}"
                 )
 
         return {
@@ -297,15 +312,15 @@ class TrainingWorker(QThread):
             "class_names": [c.get("name", str(i)) for i, c in enumerate(classes)] if is_cls else [],
             "params": {**resolved, **self.run_params},
             "train_history": train_history,
-            "test_history": test_history,
+            "val_history": val_history,          # validation (monitoring) loss per epoch
             "best_epoch": best_epoch,
-            "final_test_metrics": final_test_metrics,
-            "final_val_metrics": final_val_metrics,
+            "final_val_metrics": final_val_metrics,   # validation split (monitored)
+            "final_test_metrics": final_test_metrics, # test split (held out)
             "elapsed_seconds": elapsed,
             "checkpoint_path": best_ckpt if os.path.exists(best_ckpt) else "",
             "n_train": len(train_samples),
-            "n_test": len(test_samples),
             "n_val": len(val_samples),
+            "n_test": len(test_samples),
         }
 
     @staticmethod
@@ -319,11 +334,12 @@ class TrainingWorker(QThread):
             return entry
 
         return {
-            "batch_size": pick("batch_size", "32"),
+            "batch_size":    pick("batch_size",    "32"),
             "learning_rate": pick("learning_rate", "0.001"),
-            "optimizer": pick("optimizer", "Adam"),
-            "weight_decay": pick("weight_decay", "1e-4"),
-            "loss": pick("loss", "MSE"),
+            "optimizer":     pick("optimizer",     "Adam"),
+            "weight_decay":  pick("weight_decay",  "1e-4"),
+            "loss":          pick("loss",           "MSE"),
+            "architecture":  pick("architecture",   "ResNet-50"),
         }
 
 

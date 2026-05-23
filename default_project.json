@@ -230,7 +230,7 @@
       "experiment_no": "07",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
-      "split": "test",
+      "split": "validation",
       "notes": "",
       "time_frames": [
         {
@@ -291,7 +291,7 @@
       "experiment_no": "08",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
-      "split": "validation",
+      "split": "test",
       "notes": "",
       "time_frames": [
         {
@@ -730,7 +730,7 @@
       "experiment_no": "16",
       "date": "2026-03-18 00:00:00",
       "operator": "Arda - Burak",
-      "split": "test",
+      "split": "validation",
       "notes": "",
       "time_frames": [
         {
@@ -791,7 +791,7 @@
       "experiment_no": "17",
       "date": "2026-03-18 00:00:00",
       "operator": "Arda - Burak",
-      "split": "validation",
+      "split": "test",
       "notes": "",
       "time_frames": [
         {
@@ -909,18 +909,7 @@
   },
   "model": {
     "mode": "transfer",
-    "transfer": {
-      "architecture": "ResNet-18",
-      "pretrained": true,
-      "freeze_backbone": false,
-      "unfreeze_last_n": 0,
-      "dropout": 0.5,
-      "architecture_grid": {
-        "use_grid": false,
-        "values": "ResNet-50,EfficientNet-B0,EfficientNet-B3,MobileNet-V3-Large",
-        "value": "ResNet-18"
-      }
-    },
+    "transfer": {},
     "scratch": {
       "num_conv_blocks": 4,
       "base_filters": 32,
@@ -935,23 +924,27 @@
       "enabled": true,
       "classes": [
         {
-          "name": "<10",
+          "name": "C<3",
+          "max": 3.0
+        },
+        {
+          "name": "3-10",
           "max": 10.0
         },
         {
-          "name": "10-20",
-          "max": 20.0
+          "name": "10-25",
+          "max": 25.0
         },
         {
-          "name": "20-30",
-          "max": 30.0
-        },
-        {
-          "name": "30-40",
+          "name": "25-40",
           "max": 40.0
         },
         {
-          "name": "40<",
+          "name": "40-55",
+          "max": 55.0
+        },
+        {
+          "name": "55<C",
           "max": null
         }
       ]
@@ -961,23 +954,27 @@
     "enabled": true,
     "classes": [
       {
-        "name": "<10",
+        "name": "C<3",
+        "max": 3.0
+      },
+      {
+        "name": "3-10",
         "max": 10.0
       },
       {
-        "name": "10-20",
-        "max": 20.0
+        "name": "10-25",
+        "max": 25.0
       },
       {
-        "name": "20-30",
-        "max": 30.0
-      },
-      {
-        "name": "30-40",
+        "name": "25-40",
         "max": 40.0
       },
       {
-        "name": "40<",
+        "name": "40-55",
+        "max": 55.0
+      },
+      {
+        "name": "55<C",
         "max": null
       }
     ]
@@ -1020,11 +1017,21 @@
     },
     "early_stopping": {
       "enabled": true,
-      "patience": 8,
+      "patience": 6,
       "min_delta": 0.0001
     },
     "grid_search_enabled": false,
     "output_dir": "./results",
-    "num_workers": 0
+    "num_workers": 0,
+    "use_amp": false,
+    "architecture": {
+      "value": "ResNet-18",
+      "values": "ResNet-50,EfficientNet-B0,EfficientNet-B3,MobileNet-V3-Large",
+      "use_grid": true
+    },
+    "pretrained": true,
+    "freeze_backbone": false,
+    "unfreeze_last_n": 0,
+    "dropout_head": 0.5
   }
 }

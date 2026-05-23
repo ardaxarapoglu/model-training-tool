@@ -1,15 +1,13 @@
 """Model configuration panel: transfer learning vs from-scratch CNN."""
 from qtpy.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox,
-    QLabel, QCheckBox, QComboBox, QSpinBox, QDoubleSpinBox,
+    QLabel, QCheckBox, QSpinBox, QDoubleSpinBox,
     QRadioButton, QButtonGroup, QStackedWidget, QScrollArea,
     QFrame, QLineEdit, QSizePolicy, QTableWidget, QTableWidgetItem,
     QPushButton, QHeaderView,
 )
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QFont, QColor
-
-from ..core.model_builder import ARCHITECTURES
 
 
 class ModelPanel(QWidget):
@@ -131,97 +129,17 @@ class ModelPanel(QWidget):
 
         # -- Transfer page --
         transfer_page = QWidget()
-        tp = QFormLayout(transfer_page)
-        tp.setLabelAlignment(Qt.AlignRight)
-        tp.setHorizontalSpacing(12)
-
-        self.cmb_arch = QComboBox()
-        for name in ARCHITECTURES:
-            self.cmb_arch.addItem(name, name)
-        self.cmb_arch.setCurrentText("ResNet-50")
-        self.cmb_arch.setToolTip(
-            "The backbone CNN architecture used for feature extraction.\n"
-            "• ResNet-50 / 101   – solid all-around choice; fast to train.\n"
-            "• EfficientNet-B0   – small and fast; good for limited GPU memory.\n"
-            "• EfficientNet-B3/4 – larger, often more accurate, slower.\n"
-            "• MobileNet-V3      – very fast but lower capacity.\n"
-            "• DenseNet-121      – connects all layers; strong feature reuse.\n"
-            "• VGG-16 / 19       – older, large memory footprint, usually outperformed.\n"
-            "Use the Architecture Grid Search below to compare several at once."
+        tp_v = QVBoxLayout(transfer_page)
+        tp_v.setContentsMargins(8, 8, 8, 8)
+        tp_info = QLabel(
+            "Architecture selection, pretrained weights, freeze/unfreeze, and dropout settings\n"
+            "have been moved to the  <b>④ Training</b>  tab so they can be included\n"
+            "in grid search alongside hyperparameters."
         )
-        tp.addRow("Architecture:", self.cmb_arch)
-
-        arch_info = QLabel(
-            "ResNet / VGG / DenseNet / MobileNet / EfficientNet families available."
-        )
-        arch_info.setStyleSheet("color:#666;font-size:11px;")
-        tp.addRow("", arch_info)
-
-        self.chk_pretrained = QCheckBox("Use pretrained ImageNet weights")
-        self.chk_pretrained.setChecked(True)
-        self.chk_pretrained.setToolTip(
-            "Load weights trained on ImageNet as the starting point.\n"
-            "Strongly recommended — the network already knows general visual features\n"
-            "and will converge much faster with far fewer froth images.\n"
-            "Only disable if you suspect ImageNet features are harmful for your data."
-        )
-        tp.addRow("", self.chk_pretrained)
-
-        self.chk_freeze = QCheckBox("Freeze backbone  (only train head)")
-        self.chk_freeze.setToolTip(
-            "Lock all backbone weights so only the final prediction head is updated.\n"
-            "Very fast — only a few thousand parameters are trained.\n"
-            "Good first step when you have very few images (< ~500 per class).\n"
-            "Combine with 'Unfreeze last N' to fine-tune the top layers gradually."
-        )
-        tp.addRow("", self.chk_freeze)
-
-        unfreeze_row = QHBoxLayout()
-        self.sp_unfreeze = QSpinBox()
-        self.sp_unfreeze.setRange(0, 500)
-        self.sp_unfreeze.setValue(0)
-        self.sp_unfreeze.setToolTip(
-            "Number of parameter tensors from the end of the backbone to unfreeze. "
-            "0 = respect freeze-backbone setting exactly."
-        )
-        unfreeze_row.addWidget(self.sp_unfreeze)
-        unfreeze_row.addWidget(QLabel("last param tensors (0 = off)"))
-        unfreeze_row.addStretch()
-        tp.addRow("Unfreeze last N:", unfreeze_row)
-
-        self.sp_dropout_t = QDoubleSpinBox()
-        self.sp_dropout_t.setRange(0.0, 0.9)
-        self.sp_dropout_t.setSingleStep(0.05)
-        self.sp_dropout_t.setDecimals(2)
-        self.sp_dropout_t.setValue(0.5)
-        self.sp_dropout_t.setToolTip(
-            "Randomly zeros this fraction of neurons in the prediction head during training.\n"
-            "Acts as regularisation — forces the network to not rely on any single neuron.\n"
-            "0.5 (50%) is a strong default. Reduce to 0.2–0.3 if the model underfits."
-        )
-        tp.addRow("Dropout (head):", self.sp_dropout_t)
-
-        # Grid search for architecture
-        tp.addRow(QLabel(""))
-        gs_lbl = QLabel("Architecture grid search  (comma-separated, only active in grid-search mode):")
-        gs_lbl.setStyleSheet("color:#555;font-size:11px;")
-        tp.addRow("", gs_lbl)
-        self.chk_arch_grid = QCheckBox("Include architecture in grid search")
-        self.chk_arch_grid.setToolTip(
-            "When grid search is enabled, train one run per architecture listed below.\n"
-            "Combine with LR / batch size grid rows to find the best architecture + hyperparameters."
-        )
-        tp.addRow("", self.chk_arch_grid)
-        self.edit_arch_values = QLineEdit()
-        self.edit_arch_values.setPlaceholderText("e.g., ResNet-50,ResNet-101,EfficientNet-B0")
-        self.edit_arch_values.setToolTip(
-            "Comma-separated list of architectures to sweep over during grid search.\n"
-            "Must match names in the Architecture dropdown exactly."
-        )
-        self.edit_arch_values.setEnabled(False)
-        self.chk_arch_grid.toggled.connect(self.edit_arch_values.setEnabled)
-        tp.addRow("Architectures:", self.edit_arch_values)
-
+        tp_info.setWordWrap(True)
+        tp_info.setStyleSheet("color:#555; font-size:11px; margin-top:8px;")
+        tp_v.addWidget(tp_info)
+        tp_v.addStretch()
         self.stack.addWidget(transfer_page)
 
         # -- Scratch page --
@@ -341,18 +259,7 @@ class ModelPanel(QWidget):
     def get_config(self) -> dict:
         return {
             "mode": "transfer" if self.rb_transfer.isChecked() else "scratch",
-            "transfer": {
-                "architecture": self.cmb_arch.currentText(),
-                "pretrained": self.chk_pretrained.isChecked(),
-                "freeze_backbone": self.chk_freeze.isChecked(),
-                "unfreeze_last_n": self.sp_unfreeze.value(),
-                "dropout": self.sp_dropout_t.value(),
-                "architecture_grid": {
-                    "use_grid": self.chk_arch_grid.isChecked(),
-                    "values": self.edit_arch_values.text(),
-                    "value": self.cmb_arch.currentText(),
-                },
-            },
+            "transfer": {},   # architecture/pretrained/freeze/dropout now in training config
             "scratch": {
                 "num_conv_blocks": self.sp_conv_blocks.value(),
                 "base_filters": self.sp_base_filters.value(),
@@ -372,20 +279,6 @@ class ModelPanel(QWidget):
             self.rb_transfer.setChecked(True)
         else:
             self.rb_scratch.setChecked(True)
-
-        tr = cfg.get("transfer", {})
-        arch = tr.get("architecture", "ResNet-50")
-        idx = self.cmb_arch.findText(arch)
-        if idx >= 0:
-            self.cmb_arch.setCurrentIndex(idx)
-        self.chk_pretrained.setChecked(tr.get("pretrained", True))
-        self.chk_freeze.setChecked(tr.get("freeze_backbone", False))
-        self.sp_unfreeze.setValue(int(tr.get("unfreeze_last_n", 0)))
-        self.sp_dropout_t.setValue(float(tr.get("dropout", 0.5)))
-
-        arch_grid = tr.get("architecture_grid", {})
-        self.chk_arch_grid.setChecked(arch_grid.get("use_grid", False))
-        self.edit_arch_values.setText(arch_grid.get("values", ""))
 
         sc = cfg.get("scratch", {})
         self.sp_conv_blocks.setValue(int(sc.get("num_conv_blocks", 4)))

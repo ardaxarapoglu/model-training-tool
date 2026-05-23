@@ -52,13 +52,7 @@ def default_config() -> dict:
         },
         "model": {
             "mode": "transfer",
-            "transfer": {
-                "architecture": "resnet50",
-                "pretrained": True,
-                "freeze_backbone": False,
-                "unfreeze_last_n": 0,
-                "dropout": 0.5,
-            },
+            "transfer": {},   # architecture/pretrained/freeze/dropout now in training config
             "scratch": {
                 "num_conv_blocks": 4,
                 "base_filters": 32,
@@ -68,6 +62,13 @@ def default_config() -> dict:
             },
         },
         "training": {
+            # Architecture / transfer learning (moved here so grid search covers them)
+            "architecture":    {"value": "ResNet-50", "values": "ResNet-50,EfficientNet-B0", "use_grid": False},
+            "pretrained":      True,
+            "freeze_backbone": False,
+            "unfreeze_last_n": 0,
+            "dropout_head":    0.5,
+            # Hyperparameters
             "epochs": 50,
             "batch_size": {"value": "32", "values": "16,32,64", "use_grid": False},
             "learning_rate": {"value": "0.001", "values": "0.01,0.001,0.0001", "use_grid": False},

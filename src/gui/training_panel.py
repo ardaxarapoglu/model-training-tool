@@ -126,6 +126,69 @@ class TrainingPanel(QWidget):
         gs_v.addWidget(gs_info)
         cfg_v.addWidget(gs_grp)
 
+        # ---- Architecture (Transfer Learning) ----
+        arch_grp = QGroupBox("Architecture  (Transfer Learning)")
+        arch_grp.setToolTip(
+            "Settings used when 'Transfer Learning' is selected in the ③ Model tab.\n"
+            "Ignored when 'Train from Scratch' is selected."
+        )
+        arch_form = QFormLayout(arch_grp)
+        arch_form.setLabelAlignment(Qt.AlignRight)
+        cfg_v.addWidget(arch_grp)
+
+        self.row_arch = _ParamRow("Architecture", "ResNet-50",
+            "The CNN backbone to use for feature extraction.\n"
+            "• ResNet-50 / 101   – solid default; fast to train.\n"
+            "• EfficientNet-B0   – small and fast.\n"
+            "• EfficientNet-B3/4 – larger, often more accurate, slower.\n"
+            "• MobileNet-V3      – very fast, lower capacity.\n"
+            "• DenseNet-121      – strong feature reuse.\n"
+            "Grid: enter multiple names (e.g. ResNet-50,EfficientNet-B0) to sweep."
+        )
+        arch_form.addRow(self.row_arch)
+
+        self.chk_pretrained = QCheckBox("Use pretrained ImageNet weights")
+        self.chk_pretrained.setChecked(True)
+        self.chk_pretrained.setToolTip(
+            "Load weights trained on ImageNet as the starting point.\n"
+            "Strongly recommended — the network already knows general visual features\n"
+            "and converges much faster with far fewer images."
+        )
+        arch_form.addRow("", self.chk_pretrained)
+
+        self.chk_freeze = QCheckBox("Freeze backbone  (only train head)")
+        self.chk_freeze.setToolTip(
+            "Lock all backbone weights; only the final prediction head is updated.\n"
+            "Very fast. Good first step when you have very few images (< ~500 per class).\n"
+            "Combine with 'Unfreeze last N' to fine-tune the top layers gradually."
+        )
+        arch_form.addRow("", self.chk_freeze)
+
+        unfreeze_row = QHBoxLayout()
+        self.sp_unfreeze = QSpinBox()
+        self.sp_unfreeze.setRange(0, 500)
+        self.sp_unfreeze.setValue(0)
+        self.sp_unfreeze.setToolTip(
+            "Number of backbone parameter tensors (from the end) to unfreeze.\n"
+            "0 = fully respect the Freeze Backbone setting.\n"
+            "Higher values fine-tune more of the backbone."
+        )
+        unfreeze_row.addWidget(self.sp_unfreeze)
+        unfreeze_row.addWidget(QLabel("last param tensors (0 = off)"))
+        unfreeze_row.addStretch()
+        arch_form.addRow("Unfreeze last N:", unfreeze_row)
+
+        self.sp_dropout_head = QDoubleSpinBox()
+        self.sp_dropout_head.setRange(0.0, 0.9)
+        self.sp_dropout_head.setSingleStep(0.05)
+        self.sp_dropout_head.setDecimals(2)
+        self.sp_dropout_head.setValue(0.5)
+        self.sp_dropout_head.setToolTip(
+            "Dropout applied to the prediction head during training.\n"
+            "0.5 is a strong default. Reduce to 0.2–0.3 if the model underfits."
+        )
+        arch_form.addRow("Dropout (head):", self.sp_dropout_head)
+
         # Hyperparameter rows
         params_grp = QGroupBox("Hyperparameters")
         params_form = QFormLayout(params_grp)
@@ -181,7 +244,10 @@ class TrainingPanel(QWidget):
         )
         for row in (self.row_bs, self.row_lr, self.row_opt, self.row_wd, self.row_loss):
             params_form.addRow(row)
-            row.set_grid_visible(False)   # hidden until grid search enabled
+
+        # Hide all Grid: controls until grid search is enabled
+        for row in (self.row_arch, self.row_bs, self.row_lr, self.row_opt, self.row_wd, self.row_loss):
+            row.set_grid_visible(False)
 
         # SGD momentum (always single value)
         mom_row = QHBoxLayout()
@@ -398,18 +464,18 @@ class TrainingPanel(QWidget):
         self.pbar_epoch = QProgressBar()
         rv.addWidget(self.pbar_epoch)
 
-        # Live metrics
-        metrics_grp = QGroupBox("Current Metrics")
+        # Live metrics  (Val = validation split, monitored each epoch)
+        metrics_grp = QGroupBox("Current Metrics  (Validation split — monitored each epoch)")
         metrics_h = QHBoxLayout(metrics_grp)
         self.lbl_train_loss = _metric_label("Train Loss", "—")
-        self.lbl_test_loss  = _metric_label("Test Loss",  "—")
-        self.lbl_test_rmse  = _metric_label("Test RMSE",  "—")
-        self.lbl_test_mae   = _metric_label("Test MAE",   "—")
-        self.lbl_test_acc   = _metric_label("Test Acc",   "—")
-        self.lbl_test_f1    = _metric_label("Test F1",    "—")
-        for w in (self.lbl_train_loss, self.lbl_test_loss,
-                  self.lbl_test_rmse, self.lbl_test_mae,
-                  self.lbl_test_acc, self.lbl_test_f1):
+        self.lbl_val_loss   = _metric_label("Val Loss",   "—")
+        self.lbl_val_rmse   = _metric_label("Val RMSE",   "—")
+        self.lbl_val_mae    = _metric_label("Val MAE",    "—")
+        self.lbl_val_acc    = _metric_label("Val Acc",    "—")
+        self.lbl_val_f1     = _metric_label("Val F1",     "—")
+        for w in (self.lbl_train_loss, self.lbl_val_loss,
+                  self.lbl_val_rmse, self.lbl_val_mae,
+                  self.lbl_val_acc, self.lbl_val_f1):
             metrics_h.addWidget(w)
         rv.addWidget(metrics_grp)
 
@@ -433,7 +499,7 @@ class TrainingPanel(QWidget):
 
     # ---------------------------------------------------------------- grid search toggle
     def _on_grid_search_toggled(self, enabled: bool):
-        for row in (self.row_bs, self.row_lr, self.row_opt, self.row_wd, self.row_loss):
+        for row in (self.row_arch, self.row_bs, self.row_lr, self.row_opt, self.row_wd, self.row_loss):
             row.set_grid_visible(enabled)
 
     # ---------------------------------------------------------------- output dir browse
@@ -464,6 +530,9 @@ class TrainingPanel(QWidget):
         self.log_edit.clear()
         self._reset_metrics()
 
+        import datetime
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
         if use_grid:
             worker = GridSearchWorker(full_config)
             worker.run_log.connect(self._on_log)
@@ -475,7 +544,7 @@ class TrainingPanel(QWidget):
             worker.error.connect(self._on_error)
             self.lbl_status.setText("Grid search running…")
         else:
-            worker = TrainingWorker(full_config, run_id="single_run")
+            worker = TrainingWorker(full_config, run_id=f"run_{ts}")
             worker.log.connect(self._on_log)
             worker.progress.connect(lambda ep, tot: self._on_epoch_progress(ep, tot))
             worker.epoch_metrics.connect(self._on_epoch_metrics)
@@ -503,16 +572,16 @@ class TrainingPanel(QWidget):
 
     def _on_epoch_metrics(self, m: dict):
         self.lbl_train_loss.findChild(QLabel, "value").setText(f"{m.get('train_loss', 0):.4f}")
-        tl = m.get("test_loss")
-        self.lbl_test_loss.findChild(QLabel, "value").setText(f"{tl:.4f}" if tl is not None else "—")
-        tr = m.get("test_rmse")
-        self.lbl_test_rmse.findChild(QLabel, "value").setText(f"{tr:.4f}" if tr is not None else "—")
-        tm = m.get("test_mae")
-        self.lbl_test_mae.findChild(QLabel, "value").setText(f"{tm:.4f}" if tm is not None else "—")
-        ta = m.get("test_accuracy")
-        self.lbl_test_acc.findChild(QLabel, "value").setText(f"{ta:.3f}" if ta is not None else "—")
-        tf = m.get("test_f1")
-        self.lbl_test_f1.findChild(QLabel, "value").setText(f"{tf:.3f}" if tf is not None else "—")
+        vl = m.get("val_loss")
+        self.lbl_val_loss.findChild(QLabel, "value").setText(f"{vl:.4f}" if vl is not None else "—")
+        vr = m.get("val_rmse")
+        self.lbl_val_rmse.findChild(QLabel, "value").setText(f"{vr:.4f}" if vr is not None else "—")
+        vm = m.get("val_mae")
+        self.lbl_val_mae.findChild(QLabel, "value").setText(f"{vm:.4f}" if vm is not None else "—")
+        va = m.get("val_accuracy")
+        self.lbl_val_acc.findChild(QLabel, "value").setText(f"{va:.3f}" if va is not None else "—")
+        vf = m.get("val_f1")
+        self.lbl_val_f1.findChild(QLabel, "value").setText(f"{vf:.3f}" if vf is not None else "—")
 
     def _on_gs_run_started(self, run_num: int, total: int, params: dict):
         self.lbl_run_progress.setText(f"Run {run_num} / {total}")
@@ -550,9 +619,9 @@ class TrainingPanel(QWidget):
             mw.receive_training_results(results)
 
     def _reset_metrics(self):
-        for w in (self.lbl_train_loss, self.lbl_test_loss,
-                  self.lbl_test_rmse, self.lbl_test_mae,
-                  self.lbl_test_acc, self.lbl_test_f1):
+        for w in (self.lbl_train_loss, self.lbl_val_loss,
+                  self.lbl_val_rmse, self.lbl_val_mae,
+                  self.lbl_val_acc, self.lbl_val_f1):
             vl = w.findChild(QLabel, "value")
             if vl:
                 vl.setText("—")
@@ -560,6 +629,13 @@ class TrainingPanel(QWidget):
     # ---------------------------------------------------------------- public API
     def get_config(self) -> dict:
         return {
+            # Architecture / transfer learning settings
+            "architecture":     self.row_arch.get_entry(),
+            "pretrained":       self.chk_pretrained.isChecked(),
+            "freeze_backbone":  self.chk_freeze.isChecked(),
+            "unfreeze_last_n":  self.sp_unfreeze.value(),
+            "dropout_head":     self.sp_dropout_head.value(),
+            # Hyperparameters
             "epochs": self.sp_epochs.value(),
             "batch_size": self.row_bs.get_entry(),
             "learning_rate": self.row_lr.get_entry(),
@@ -587,6 +663,13 @@ class TrainingPanel(QWidget):
         }
 
     def set_config(self, cfg: dict):
+        # Architecture / transfer learning
+        self.row_arch.set_entry(cfg.get("architecture", "ResNet-50"))
+        self.chk_pretrained.setChecked(bool(cfg.get("pretrained", True)))
+        self.chk_freeze.setChecked(bool(cfg.get("freeze_backbone", False)))
+        self.sp_unfreeze.setValue(int(cfg.get("unfreeze_last_n", 0)))
+        self.sp_dropout_head.setValue(float(cfg.get("dropout_head", 0.5)))
+        # Hyperparameters
         self.sp_epochs.setValue(int(cfg.get("epochs", 50)))
         self.row_bs.set_entry(cfg.get("batch_size", "32"))
         self.row_lr.set_entry(cfg.get("learning_rate", "0.001"))

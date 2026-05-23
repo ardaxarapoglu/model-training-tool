@@ -1,5 +1,6 @@
 """Grid search orchestration.  Produces all param combinations and runs them sequentially."""
 import itertools
+import datetime
 from typing import List, Dict
 
 from qtpy.QtCore import QThread, Signal
@@ -19,26 +20,17 @@ def parse_multi_values(entry) -> list:
 
 
 def generate_combinations(t_cfg: dict, model_cfg: dict) -> List[Dict]:
-    """Return a list of resolved param dicts (one per grid-search combo)."""
-    param_keys = ["batch_size", "learning_rate", "optimizer", "weight_decay", "loss"]
+    """Return a list of resolved param dicts (one per grid-search combo).
+
+    Architecture is now a standard _ParamRow in the training config so it
+    participates in grid search exactly like batch_size, lr, etc.
+    """
+    param_keys = [
+        "batch_size", "learning_rate", "optimizer",
+        "weight_decay", "loss", "architecture",
+    ]
     value_lists = [parse_multi_values(t_cfg.get(k, {})) for k in param_keys]
-
-    # Architecture is part of model config but can be in grid search
-    arch_values = []
-    if model_cfg.get("mode") == "transfer":
-        arch_entry = model_cfg.get("transfer", {}).get("architecture_grid", None)
-        if arch_entry and isinstance(arch_entry, dict) and arch_entry.get("use_grid", False):
-            raw = arch_entry.get("values", "")
-            arch_values = [p.strip() for p in str(raw).split(",") if p.strip()]
-
-    combos = []
-    for combo in itertools.product(*value_lists):
-        entry = dict(zip(param_keys, combo))
-        if arch_values:
-            for arch in arch_values:
-                combos.append({**entry, "architecture": arch})
-        else:
-            combos.append(entry)
+    combos = [dict(zip(param_keys, combo)) for combo in itertools.product(*value_lists)]
     return combos
 
 
@@ -70,11 +62,14 @@ class GridSearchWorker(QThread):
             total = len(combos)
             self.run_log.emit(f"Grid search: {total} combination(s) to evaluate.")
 
+            # Timestamp prefix makes every grid-search session unique (no overwrites)
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
             results = []
             for i, params in enumerate(combos):
                 if self._stop:
                     break
-                run_id = f"gs_run_{i + 1:03d}"
+                run_id = f"gs_{ts}_{i + 1:03d}"
                 self.run_started.emit(i + 1, total, params)
                 self.run_log.emit(f"\n=== Run {i+1}/{total}: {params} ===")
 

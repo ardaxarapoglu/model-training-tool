@@ -13,11 +13,13 @@ from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QColor, QFont
 
 
-SPLITS = ["train", "test", "validation"]
+SPLITS = ["train", "validation", "test"]
+# validation = watched during training (early stopping / LR scheduling)
+# test       = held out, evaluated exactly once at the end
 SPLIT_COLORS = {
-    "train": QColor("#c8e6c9"),
-    "test": QColor("#fff9c4"),
-    "validation": QColor("#b3e5fc"),
+    "train":      QColor("#c8e6c9"),   # green
+    "validation": QColor("#fff9c4"),   # yellow  – active during training
+    "test":       QColor("#b3e5fc"),   # blue    – final hold-out
 }
 N_FRAMES = 7
 
@@ -78,7 +80,7 @@ class ExperimentsPanel(QWidget):
         sep.setFrameShape(QFrame.HLine)
         lv.addWidget(sep)
 
-        self.lbl_summary = QLabel("Train: 0  Test: 0  Val: 0")
+        self.lbl_summary = QLabel("Train: 0  Val: 0  Test: 0")
         self.lbl_summary.setStyleSheet("color:#555;font-size:11px;")
         lv.addWidget(self.lbl_summary)
 
@@ -118,8 +120,14 @@ class ExperimentsPanel(QWidget):
         basic.addRow("Operator:", self.edit_operator)
 
         self.cmb_split = QComboBox()
+        _SPLIT_LABELS = {"train": "Train", "validation": "Validation (monitored)", "test": "Test (held out)"}
         for s in SPLITS:
-            self.cmb_split.addItem(s.capitalize(), s)
+            self.cmb_split.addItem(_SPLIT_LABELS[s], s)
+        self.cmb_split.setToolTip(
+            "Train      – images used to update model weights every epoch.\n"
+            "Validation – monitored after each epoch for early stopping and LR scheduling.\n"
+            "Test       – NEVER seen during training; evaluated once for the final report."
+        )
         self.cmb_split.currentIndexChanged.connect(self._save_current)
         basic.addRow("Assigned to:", self.cmb_split)
 
@@ -456,7 +464,7 @@ class ExperimentsPanel(QWidget):
         from collections import Counter
         c = Counter(e.get("split", "train") for e in self._experiments)
         self.lbl_summary.setText(
-            f"Train: {c['train']}  Test: {c['test']}  Val: {c['validation']}"
+            f"Train: {c['train']}  Val: {c['validation']}  Test: {c['test']}"
         )
 
     # ---------------------------------------------------------------- public API

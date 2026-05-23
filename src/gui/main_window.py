@@ -26,6 +26,24 @@ class MainWindow(QMainWindow):
         self._setup_menu()
         self._setup_statusbar()
         self._restore_geometry()
+        self._try_load_default_project()
+
+    # ------------------------------------------------------------------ default project
+    def _try_load_default_project(self):
+        """Auto-open default_project.json if it exists next to main.py (project root)."""
+        # main_window.py lives in src/gui/ — walk up two levels to get the project root
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        default_path = os.path.join(root, "default_project.json")
+        if not os.path.isfile(default_path):
+            return
+        try:
+            cfg = config_manager.load(default_path)
+            self._apply_config(cfg)
+            self._config_path = default_path
+            self.setWindowTitle(f"Froth CNN Training Tool — default_project.json")
+            self.lbl_status.setText(f"Loaded default project: {default_path}")
+        except Exception as exc:
+            self.lbl_status.setText(f"Could not load default_project.json: {exc}")
 
     # ------------------------------------------------------------------ UI
     def _setup_ui(self):
@@ -257,16 +275,16 @@ class MainWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
 
-        # Validation-set isolation notice
+        # Test-set isolation notice (test = held out, evaluated once at the end)
         experiments = cfg.get("experiments", [])
-        val_exps = [e for e in experiments if e.get("split") == "validation"]
-        if val_exps:
+        test_exps = [e for e in experiments if e.get("split") == "test"]
+        if test_exps:
             QMessageBox.information(
                 self,
-                "Validation Set Isolated",
-                f"{len(val_exps)} validation experiment(s) are held out.\n"
+                "Test Set Isolated",
+                f"{len(test_exps)} test experiment(s) are held out.\n"
                 "They will NOT be used during training or model selection.\n"
-                "They are evaluated once at the very end of each run.",
+                "They are evaluated exactly once at the very end of each run.",
             )
 
         # Auto-export label CSV to output dir before starting
@@ -299,9 +317,10 @@ class MainWindow(QMainWindow):
             return errors, warnings
 
         # Count usable images per split
+        # validation = monitored during training; test = held out
         split_counts = {}
         missing_folders = []
-        for split in ("train", "test", "validation"):
+        for split in ("train", "validation", "test"):
             try:
                 samples = collect_samples(experiments, split, class_cfg)
                 split_counts[split] = len(samples)
@@ -331,10 +350,10 @@ class MainWindow(QMainWindow):
                 "'train' and its time-frame folder paths are correct."
             )
 
-        if split_counts.get("test", 0) == 0:
+        if split_counts.get("validation", 0) == 0:
             warnings.append(
-                "No test images found.  Early stopping will use training loss instead of "
-                "test loss, which may cause overfitting."
+                "No validation images found.  Early stopping will use training loss, "
+                "which may cause overfitting.  Assign at least one experiment to 'Validation'."
             )
 
         # Classification-specific checks

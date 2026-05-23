@@ -21,10 +21,12 @@ from matplotlib.figure import Figure
 
 
 RESULT_COLS = [
-    "Run ID", "Mode", "Batch", "LR", "Optimizer", "WD", "Loss Fn",
+    "Run ID", "Mode", "Architecture", "Batch", "LR", "Optimizer", "WD", "Loss Fn",
     "Best Ep.", "Train Loss",
+    # Validation = monitored during training (early stopping / LR scheduling)
+    "Val Loss", "Val RMSE", "Val MAE", "Val R²", "Val Acc", "Val F1",
+    # Test = held-out, evaluated exactly once after training completes
     "Test RMSE", "Test MAE", "Test R²", "Test Acc", "Test F1",
-    "Val RMSE",  "Val MAE",  "Val R²",  "Val Acc",  "Val F1",
     "Time (s)", "Checkpoint",
 ]
 
@@ -195,23 +197,28 @@ class ResultsPanel(QWidget):
         self.table.insertRow(row)
 
         params = r.get("params", {})
+        # vm = validation metrics (monitored during training)
+        # tm = test metrics (held-out, evaluated once)
+        vm = r.get("final_val_metrics",  {})
         tm = r.get("final_test_metrics", {})
-        vm = r.get("final_val_metrics", {})
 
-        def _v(key, fmt="{:.4f}"):
-            v = tm.get(key)
+        def _val(key, fmt="{:.4f}"):
+            v = vm.get(key)
             return fmt.format(v) if v is not None else "—"
 
-        def _vv(key, fmt="{:.4f}"):
-            v = vm.get(key)
+        def _tst(key, fmt="{:.4f}"):
+            v = tm.get(key)
             return fmt.format(v) if v is not None else "—"
 
         train_hist = r.get("train_history", [])
         best_train = min(train_hist) if train_hist else None
+        val_hist   = r.get("val_history", [])
+        best_val   = min((v for v in val_hist if v is not None), default=None)
 
         values = [
             r.get("run_id", ""),
             r.get("mode", "regression"),
+            str(params.get("architecture", "—")),
             str(params.get("batch_size", "—")),
             str(params.get("learning_rate", "—")),
             str(params.get("optimizer", "—")),
@@ -219,16 +226,19 @@ class ResultsPanel(QWidget):
             str(params.get("loss", "—")),
             str(r.get("best_epoch", "—")),
             f"{best_train:.4f}" if best_train is not None else "—",
-            _v("rmse"),
-            _v("mae"),
-            _v("r2"),
-            _v("accuracy", "{:.3f}"),
-            _v("f1",       "{:.3f}"),
-            _vv("rmse"),
-            _vv("mae"),
-            _vv("r2"),
-            _vv("accuracy", "{:.3f}"),
-            _vv("f1",       "{:.3f}"),
+            # Validation columns
+            f"{best_val:.4f}"       if best_val  is not None else "—",
+            _val("rmse"),
+            _val("mae"),
+            _val("r2"),
+            _val("accuracy", "{:.3f}"),
+            _val("f1",       "{:.3f}"),
+            # Test columns
+            _tst("rmse"),
+            _tst("mae"),
+            _tst("r2"),
+            _tst("accuracy", "{:.3f}"),
+            _tst("f1",       "{:.3f}"),
             f"{r.get('elapsed_seconds', 0):.1f}",
             os.path.basename(r.get("checkpoint_path", "")),
         ]
@@ -247,13 +257,15 @@ class ResultsPanel(QWidget):
     def _update_best_label(self):
         best = self._find_best()
         if best:
-            tm = best.get("final_test_metrics", {})
+            # Prefer test (held-out) metrics for reporting; fall back to val
+            tm = best.get("final_test_metrics") or best.get("final_val_metrics", {})
+            src = "Test" if best.get("final_test_metrics") else "Val"
             if best.get("mode") == "classification":
                 acc = tm.get("accuracy")
-                metric_str = f"Test Acc={acc:.3f}" if acc is not None else ""
+                metric_str = f"{src} Acc={acc:.3f}" if acc is not None else ""
             else:
                 rmse = tm.get("rmse")
-                metric_str = f"Test RMSE={rmse:.4f}" if rmse is not None else ""
+                metric_str = f"{src} RMSE={rmse:.4f}" if rmse is not None else ""
             self.lbl_best.setText(f"Best: {best.get('run_id', '')}  {metric_str}")
         else:
             self.lbl_best.setText("")
@@ -267,12 +279,15 @@ class ResultsPanel(QWidget):
                     item.setBackground(QColor("#e8f5e9") if is_best else QColor("transparent"))
 
     def _find_best(self):
-        valid = [r for r in self._results if "error" not in r and r.get("final_test_metrics")]
+        valid = [r for r in self._results if "error" not in r]
         if not valid:
             return None
+        # Prefer test (held-out) for ranking; fall back to validation
+        def _metrics(r):
+            return r.get("final_test_metrics") or r.get("final_val_metrics", {})
         if valid[0].get("mode") == "classification":
-            return max(valid, key=lambda r: r["final_test_metrics"].get("accuracy", 0.0))
-        return min(valid, key=lambda r: r["final_test_metrics"].get("rmse", math.inf))
+            return max(valid, key=lambda r: _metrics(r).get("accuracy", 0.0))
+        return min(valid, key=lambda r: _metrics(r).get("rmse", math.inf))
 
     def _clear_all(self):
         if QMessageBox.question(
@@ -317,16 +332,16 @@ class ResultsPanel(QWidget):
     # -- loss curves --
     def _draw_loss_curves(self, r: dict):
         train_h = r.get("train_history", [])
-        test_h  = r.get("test_history", [])
+        val_h   = r.get("val_history", r.get("test_history", []))  # backward-compat alias
 
         self.ax_loss.clear()
         epochs = list(range(1, len(train_h) + 1))
         if train_h:
             self.ax_loss.plot(epochs, train_h, label="Train", linewidth=1.5, color="#1976D2")
-        test_valid = [(i + 1, v) for i, v in enumerate(test_h) if v is not None]
-        if test_valid:
-            ex, ey = zip(*test_valid)
-            self.ax_loss.plot(list(ex), list(ey), label="Test", linewidth=1.5, color="#F57C00")
+        val_valid = [(i + 1, v) for i, v in enumerate(val_h) if v is not None]
+        if val_valid:
+            ex, ey = zip(*val_valid)
+            self.ax_loss.plot(list(ex), list(ey), label="Val", linewidth=1.5, color="#F57C00")
         best_ep = r.get("best_epoch")
         if best_ep and best_ep <= len(train_h):
             self.ax_loss.axvline(best_ep, color="green", linestyle="--", alpha=0.7,
@@ -343,22 +358,22 @@ class ResultsPanel(QWidget):
     # -- metrics bar --
     def _draw_metrics_bar(self, r: dict):
         self.ax_val.clear()
-        vm = r.get("final_val_metrics", {})
-        tm = r.get("final_test_metrics", {})
+        vm = r.get("final_val_metrics",  {})   # validation (monitored during training)
+        tm = r.get("final_test_metrics", {})   # test (held out)
         if r.get("mode") == "classification":
-            metrics   = ["Accuracy", "F1"]
-            test_vals = [tm.get("accuracy", 0), tm.get("f1", 0)]
-            val_vals  = [vm.get("accuracy", 0), vm.get("f1", 0)]
+            metrics  = ["Accuracy", "F1"]
+            val_vals = [vm.get("accuracy", 0), vm.get("f1", 0)]
+            tst_vals = [tm.get("accuracy", 0), tm.get("f1", 0)]
         else:
-            metrics   = ["RMSE", "MAE", "R²"]
-            test_vals = [tm.get("rmse", 0), tm.get("mae", 0), tm.get("r2", 0)]
-            val_vals  = [vm.get("rmse", 0), vm.get("mae", 0), vm.get("r2", 0)]
+            metrics  = ["RMSE", "MAE", "R²"]
+            val_vals = [vm.get("rmse", 0), vm.get("mae", 0), vm.get("r2", 0)]
+            tst_vals = [tm.get("rmse", 0), tm.get("mae", 0), tm.get("r2", 0)]
         x = range(len(metrics))
         width = 0.35
-        self.ax_val.bar([xi - width/2 for xi in x], test_vals, width,
-                        label="Test", color="#1976D2", alpha=0.8)
-        self.ax_val.bar([xi + width/2 for xi in x], val_vals, width,
-                        label="Val",  color="#388E3C", alpha=0.8)
+        self.ax_val.bar([xi - width/2 for xi in x], val_vals, width,
+                        label="Val (monitored)", color="#F57C00", alpha=0.8)
+        self.ax_val.bar([xi + width/2 for xi in x], tst_vals, width,
+                        label="Test (held out)", color="#1976D2", alpha=0.8)
         self.ax_val.set_xticks(list(x))
         self.ax_val.set_xticklabels(metrics)
         self.ax_val.set_title("Final Metrics")
@@ -368,7 +383,10 @@ class ResultsPanel(QWidget):
 
     # -- confusion matrix + per-class table --
     def _draw_confusion_matrix(self, r: dict):
-        self.ax_cm.clear()
+        # Fully reset the figure to avoid colorbars accumulating on repeated clicks
+        self.fig_cm.clf()
+        self.ax_cm = self.fig_cm.add_subplot(111)
+
         self.tbl_cls_metrics.setRowCount(0)
         self.lbl_overall_metrics.setText("")
 
@@ -379,12 +397,12 @@ class ResultsPanel(QWidget):
             self.canvas_cm.draw()
             return
 
-        # Prefer validation set; fall back to test
-        vm = r.get("final_val_metrics", {})
+        # Prefer test (held-out) for confusion matrix; fall back to validation
         tm = r.get("final_test_metrics", {})
-        preds  = vm.get("predictions") or tm.get("predictions")
-        labels = vm.get("true_labels")  or tm.get("true_labels")
-        source = "Validation" if vm.get("predictions") else "Test"
+        vm = r.get("final_val_metrics",  {})
+        preds  = tm.get("predictions") or vm.get("predictions")
+        labels = tm.get("true_labels")  or vm.get("true_labels")
+        source = "Test (held out)" if tm.get("predictions") else "Validation (monitored)"
         class_names = r.get("class_names", [])
 
         if not preds or not labels:
@@ -479,12 +497,18 @@ class ResultsPanel(QWidget):
         for ax, canvas, title in (
             (self.ax_loss, self.canvas_loss, "Loss Curves"),
             (self.ax_val,  self.canvas_val,  "Final Metrics"),
-            (self.ax_cm,   self.canvas_cm,   "Confusion Matrix"),
         ):
             ax.clear()
             ax.set_title(title)
             ax.text(0.5, 0.5, "Select a run", ha="center", va="center",
                     transform=ax.transAxes, color="#aaa", fontsize=11)
             canvas.draw()
+        # Fully reset confusion matrix figure to remove any old colorbars
+        self.fig_cm.clf()
+        self.ax_cm = self.fig_cm.add_subplot(111)
+        self.ax_cm.set_title("Confusion Matrix")
+        self.ax_cm.text(0.5, 0.5, "Select a run", ha="center", va="center",
+                        transform=self.ax_cm.transAxes, color="#aaa", fontsize=11)
+        self.canvas_cm.draw()
         self.tbl_cls_metrics.setRowCount(0)
         self.lbl_overall_metrics.setText("")
