@@ -10,11 +10,18 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QFont, QColor, QPalette
 
+from ..core.model_builder import ARCHITECTURES
+
 
 class _ParamRow(QWidget):
-    """Single parameter row with value input + optional multi-value field (for grid search)."""
+    """Single parameter row with value input + optional multi-value field (for grid search).
 
-    def __init__(self, label: str, default: str, tooltip: str = ""):
+    When *choices* is provided a QComboBox is used instead of a free-text QLineEdit,
+    preventing typos in fields like Architecture, Optimizer, and Loss function.
+    """
+
+    def __init__(self, label: str, default: str, tooltip: str = "",
+                 choices: list = None):
         super().__init__()
         hl = QHBoxLayout(self)
         hl.setContentsMargins(0, 2, 0, 2)
@@ -24,8 +31,15 @@ class _ParamRow(QWidget):
         lbl.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         hl.addWidget(lbl)
 
-        self.edit_value = QLineEdit(default)
-        self.edit_value.setMaximumWidth(120)
+        self._has_choices = choices is not None
+        if self._has_choices:
+            self.edit_value = QComboBox()
+            self.edit_value.addItems(choices)
+            self.edit_value.setCurrentText(default)
+            self.edit_value.setMaximumWidth(180)
+        else:
+            self.edit_value = QLineEdit(default)
+            self.edit_value.setMaximumWidth(120)
         if tooltip:
             self.edit_value.setToolTip(tooltip)
         hl.addWidget(self.edit_value)
@@ -48,19 +62,30 @@ class _ParamRow(QWidget):
         hl.addStretch()
 
     def get_entry(self) -> dict:
+        value = (self.edit_value.currentText()
+                 if self._has_choices
+                 else self.edit_value.text().strip())
         return {
-            "value": self.edit_value.text().strip(),
+            "value": value,
             "values": self.edit_grid.text().strip(),
             "use_grid": self.chk_grid.isChecked(),
         }
 
     def set_entry(self, entry):
         if isinstance(entry, dict):
-            self.edit_value.setText(str(entry.get("value", "")))
+            val = str(entry.get("value", ""))
+            if self._has_choices:
+                self.edit_value.setCurrentText(val)
+            else:
+                self.edit_value.setText(val)
             self.edit_grid.setText(str(entry.get("values", "")))
             self.chk_grid.setChecked(bool(entry.get("use_grid", False)))
         else:
-            self.edit_value.setText(str(entry))
+            val = str(entry)
+            if self._has_choices:
+                self.edit_value.setCurrentText(val)
+            else:
+                self.edit_value.setText(val)
 
     def set_grid_visible(self, visible: bool):
         self.chk_grid.setVisible(visible)
@@ -143,7 +168,8 @@ class TrainingPanel(QWidget):
             "• EfficientNet-B3/4 – larger, often more accurate, slower.\n"
             "• MobileNet-V3      – very fast, lower capacity.\n"
             "• DenseNet-121      – strong feature reuse.\n"
-            "Grid: enter multiple names (e.g. ResNet-50,EfficientNet-B0) to sweep."
+            "Grid: enter multiple names (e.g. ResNet-50,EfficientNet-B0) to sweep.",
+            choices=list(ARCHITECTURES.keys()),
         )
         arch_form.addRow(self.row_arch)
 
@@ -227,7 +253,8 @@ class TrainingPanel(QWidget):
             "• Adam   – adaptive per-parameter LR; robust default for most tasks.\n"
             "• AdamW  – Adam with corrected weight decay; often slightly better.\n"
             "• SGD    – simple but needs careful LR and momentum tuning.\n"
-            "• RMSprop – alternative adaptive method; less common."
+            "• RMSprop – alternative adaptive method; less common.",
+            choices=["Adam", "AdamW", "SGD", "RMSprop"],
         )
         self.row_wd = _ParamRow("Weight decay", "1e-4",
             "L2 regularisation: adds a penalty for large weight values.\n"
@@ -240,7 +267,8 @@ class TrainingPanel(QWidget):
             "• MAE     – mean absolute error; more robust to outliers.\n"
             "• Huber   – smooth blend of MSE (small errors) and MAE (large errors).\n"
             "• SmoothL1 – similar to Huber; often used in object detection.\n"
-            "In classification mode CrossEntropyLoss is always used automatically."
+            "In classification mode CrossEntropyLoss is always used automatically.",
+            choices=["MSE", "MAE", "Huber", "SmoothL1"],
         )
         for row in (self.row_bs, self.row_lr, self.row_opt, self.row_wd, self.row_loss):
             params_form.addRow(row)
