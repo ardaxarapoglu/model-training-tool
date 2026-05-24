@@ -5,3 +5,10 @@ __pycache__/
 results/
 *.pt
 *.pth
+
+# Local tooling & generated outputs
+.claude/
+analyse_distribution.py
+generate_workflow.py
+heatmap.png
+pb_distribution.png

@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Skill(anthropic-skills:xlsx)",
-      "Skill(anthropic-skills:xlsx:*)",
-      "Bash(python -c ' *)"
-    ]
-  }
-}
