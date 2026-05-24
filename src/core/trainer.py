@@ -352,7 +352,7 @@ def _train_epoch_reg(model, loader, optimizer, criterion, device, scaler=None):
         imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True).unsqueeze(1)
         optimizer.zero_grad()
         if scaler is not None:
-            with torch.cuda.amp.autocast():
+            with torch.amp.autocast('cuda'):
                 preds = model(imgs)
                 loss = criterion(preds, labels)
             scaler.scale(loss).backward()
@@ -406,7 +406,7 @@ def _train_epoch_cls(model, loader, optimizer, criterion, device, scaler=None):
         imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True)
         optimizer.zero_grad()
         if scaler is not None:
-            with torch.cuda.amp.autocast():
+            with torch.amp.autocast('cuda'):
                 logits = model(imgs)
                 loss = criterion(logits, labels)
             scaler.scale(loss).backward()

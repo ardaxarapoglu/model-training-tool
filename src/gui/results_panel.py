@@ -257,71 +257,44 @@ class ResultsPanel(QWidget):
         self.chart_tabs.addTab(cm_w, "Confusion Matrix")
 
         # ── Tab 3: Performance Evaluation ─────────────────────────────────
-        perf_w      = QWidget()
-        perf_outer_v = QVBoxLayout(perf_w)
-        perf_outer_v.setContentsMargins(2, 2, 2, 2)
+        perf_w   = QWidget()
+        perf_v   = QVBoxLayout(perf_w)
+        perf_v.setContentsMargins(8, 8, 8, 8)
+        perf_v.setSpacing(8)
 
-        perf_scroll = QScrollArea()
-        perf_scroll.setWidgetResizable(True)
-        perf_scroll.setFrameShape(QFrame.NoFrame)
-        perf_outer_v.addWidget(perf_scroll)
-
-        perf_container = QWidget()
-        self._perf_v   = QVBoxLayout(perf_container)
-        self._perf_v.setSpacing(10)
-        self._perf_v.setContentsMargins(8, 8, 8, 8)
-        perf_scroll.setWidget(perf_container)
-
-        # ── Thesis goal section ───────────────────────────────────────────
-        self.grp_thesis = QGroupBox("Thesis Goal  —  ≥ 70% correct prediction")
-        thesis_v = QVBoxLayout(self.grp_thesis)
-        thesis_v.setSpacing(6)
+        # ── Accuracy section (compact) ────────────────────────────────────
+        self.grp_thesis = QGroupBox("Accuracy  (≥ 70% target)")
+        thesis_v = QHBoxLayout(self.grp_thesis)   # horizontal: big number | verdict
+        thesis_v.setSpacing(16)
 
         self.lbl_thesis_acc = QLabel("—")
-        self.lbl_thesis_acc.setFont(QFont("Arial", 42, QFont.Bold))
+        self.lbl_thesis_acc.setFont(QFont("Arial", 46, QFont.Bold))
         self.lbl_thesis_acc.setAlignment(Qt.AlignCenter)
         self.lbl_thesis_acc.setStyleSheet("color:#555;")
+        self.lbl_thesis_acc.setMinimumWidth(140)
         thesis_v.addWidget(self.lbl_thesis_acc)
 
-        pb_row = QHBoxLayout()
-        pb_row.addWidget(QLabel("0 %"))
-        self.pb_thesis = QProgressBar()
-        self.pb_thesis.setRange(0, 100)
-        self.pb_thesis.setValue(0)
-        self.pb_thesis.setTextVisible(False)
-        self.pb_thesis.setMinimumHeight(24)
-        self.pb_thesis.setStyleSheet(
-            "QProgressBar{border:1px solid #ccc;border-radius:4px;background:#eee;}"
-            "QProgressBar::chunk{background:#9E9E9E;border-radius:4px;}"
-        )
-        pb_row.addWidget(self.pb_thesis, 1)
-        pb_row.addWidget(QLabel("100 %"))
-        thesis_v.addLayout(pb_row)
-
-        threshold_note = QLabel("▲  70 % thesis threshold is at 70 % on the bar above")
-        threshold_note.setStyleSheet("font-size:10px; color:#777;")
-        threshold_note.setAlignment(Qt.AlignCenter)
-        thesis_v.addWidget(threshold_note)
-
         self.lbl_thesis_result = QLabel("Select a run to evaluate.")
-        self.lbl_thesis_result.setAlignment(Qt.AlignCenter)
         self.lbl_thesis_result.setStyleSheet(
-            "font-size:14px; font-weight:bold; color:#555; margin-top:4px;"
+            "font-size:15px; font-weight:bold; color:#555;"
         )
-        thesis_v.addWidget(self.lbl_thesis_result)
-        self._perf_v.addWidget(self.grp_thesis)
+        self.lbl_thesis_result.setWordWrap(True)
+        thesis_v.addWidget(self.lbl_thesis_result, 1)
 
-        # ── Summary metrics table ─────────────────────────────────────────
+        perf_v.addWidget(self.grp_thesis)
+
+        # ── Summary metrics table (expands to fill remaining space) ───────
         self.grp_metrics_summary = QGroupBox(
             "Classification Metrics  (Test Set — Held Out)"
         )
         summary_v = QVBoxLayout(self.grp_metrics_summary)
+        summary_v.setContentsMargins(4, 4, 4, 4)
 
         self.tbl_perf = QTableWidget(0, 4)
         _perf_hdrs = [
             ("Metric",           "Name of the evaluation metric"),
             ("Value",            "Computed value for this run"),
-            ("Rating",           "Qualitative interpretation (see glossary below)"),
+            ("Rating",           "Qualitative interpretation (see Metric Glossary tab)"),
             ("What it measures", "One-line description of what this metric captures"),
         ]
         for col, (lbl, tip) in enumerate(_perf_hdrs):
@@ -335,78 +308,103 @@ class ResultsPanel(QWidget):
         self.tbl_perf.verticalHeader().setVisible(False)
         self.tbl_perf.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tbl_perf.setAlternatingRowColors(True)
-        self.tbl_perf.setMinimumHeight(160)
+        self.tbl_perf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         summary_v.addWidget(self.tbl_perf)
-        self._perf_v.addWidget(self.grp_metrics_summary)
+        perf_v.addWidget(self.grp_metrics_summary, 1)   # stretch=1 → fills remainder
 
-        # ── Glossary ──────────────────────────────────────────────────────
-        grp_glossary = QGroupBox("Metric Glossary")
-        glossary_v   = QVBoxLayout(grp_glossary)
+        self.chart_tabs.addTab(perf_w, "Performance Evaluation")
+
+        # ── Tab 4: Metric Glossary ─────────────────────────────────────────
+        glossary_w      = QWidget()
+        glossary_outer  = QVBoxLayout(glossary_w)
+        glossary_outer.setContentsMargins(2, 2, 2, 2)
+
+        glossary_scroll = QScrollArea()
+        glossary_scroll.setWidgetResizable(True)
+        glossary_scroll.setFrameShape(QFrame.NoFrame)
+        glossary_outer.addWidget(glossary_scroll)
+
+        glossary_container = QWidget()
+        glossary_inner     = QVBoxLayout(glossary_container)
+        glossary_inner.setContentsMargins(12, 10, 12, 10)
+        glossary_scroll.setWidget(glossary_container)
+
         glossary_lbl = QLabel(
-            "<b>Accuracy</b><br>"
+            "<b style='font-size:13px'>Accuracy</b><br>"
             "Overall percentage of images classified into the correct class.  "
             "= (correctly classified) / (total images).  "
-            "This is the primary thesis target: the model must reach ≥ 70%.<br><br>"
+            "This is the primary target: the model must reach ≥ 70%.<br><br>"
 
-            "<b>Balanced Accuracy</b><br>"
+            "<b style='font-size:13px'>Balanced Accuracy</b><br>"
             "Average recall across all classes, each class weighted equally — "
             "unlike plain accuracy, it is not fooled by class imbalance.  "
-            "Example: if 'Bad' images are rare and the model ignores them, plain accuracy "
-            "can still look high while balanced accuracy exposes the failure.<br><br>"
+            "Example: if the model ignores a rare class, plain accuracy stays high "
+            "while balanced accuracy exposes the failure.<br><br>"
 
-            "<b>Cohen's Kappa (κ)</b><br>"
-            "Measures how much better than chance the model is, accounting for the "
-            "distribution of classes.  κ = 0 means no better than a random guesser; "
+            "<b style='font-size:13px'>Cohen's Kappa (κ)</b><br>"
+            "How much better than chance the model is, accounting for the class "
+            "frequency distribution.  κ = 0 means no better than a random guesser; "
             "κ = 1 means perfect.  "
-            "Interpretation bands: "
-            "≥ 0.81 Almost perfect | 0.61–0.80 Substantial | "
+            "Bands: ≥ 0.81 Almost perfect | 0.61–0.80 Substantial | "
             "0.41–0.60 Moderate | 0.21–0.40 Fair | ≤ 0.20 Slight or none.<br><br>"
 
-            "<b>Matthews Correlation Coefficient (MCC)</b><br>"
+            "<b style='font-size:13px'>Matthews Correlation Coefficient (MCC)</b><br>"
             "A correlation coefficient between the true and predicted labels.  "
             "Handles multi-class problems and class imbalance better than accuracy or F1.  "
-            "Range − 1 (all wrong) to + 1 (perfect); 0 means no better than random.  "
+            "Range − 1 (all wrong) to + 1 (perfect); 0 means random.  "
             "Often considered the most informative single number for classification.<br><br>"
 
-            "<b>Macro F1</b><br>"
-            "F1 is computed separately for each class and then averaged with equal weight.  "
-            "Forces the model to perform well on every class, regardless of how many images "
-            "it has.  Use this when all classes are equally important.<br><br>"
+            "<b style='font-size:13px'>Macro F1</b><br>"
+            "F1 computed separately per class then averaged with equal weight.  "
+            "Forces good performance on every class regardless of size.  "
+            "Use this when all class errors are equally costly.<br><br>"
 
-            "<b>Weighted F1</b><br>"
-            "Same as Macro F1 but each class's F1 is weighted by how many images it has.  "
-            "Reflects real-world performance when larger classes dominate the dataset.  "
-            "Use this for a realistic overall picture.<br><br>"
+            "<b style='font-size:13px'>Weighted F1</b><br>"
+            "Same as Macro F1 but each class's F1 is weighted by its sample count.  "
+            "Reflects real-world performance when class sizes differ.  "
+            "Use this for an overall realistic picture.<br><br>"
 
-            "<b>Precision (per class)</b><br>"
-            "Of all images the model labelled as this class, "
+            "<b style='font-size:13px'>Precision (per class)</b><br>"
+            "Of all images the model predicted as this class, "
             "the fraction that were actually correct.  "
             "= TP / (TP + FP).  "
-            "Low precision → many false alarms (the model over-predicts this class).<br><br>"
+            "Low precision → many false alarms (model over-predicts this class).<br><br>"
 
-            "<b>Recall (per class)</b><br>"
+            "<b style='font-size:13px'>Recall (per class)</b><br>"
             "Of all actual images of this class, "
             "the fraction the model correctly found.  "
             "= TP / (TP + FN).  "
             "Low recall → the model frequently misses this class.<br><br>"
 
-            "<b>F1 (per class)</b><br>"
+            "<b style='font-size:13px'>F1 (per class)</b><br>"
             "Harmonic mean of Precision and Recall: 2 × P × R / (P + R).  "
-            "Low if either metric is low — you need both to be good.<br><br>"
+            "Low if either metric is low — you need both to be good at the same time.<br><br>"
 
-            "<b>Support</b><br>"
+            "<b style='font-size:13px'>Support</b><br>"
             "Number of actual images of this class in the evaluation set.  "
             "Classes with very low support have unreliable per-class metrics — "
-            "a single additional correct or incorrect prediction can shift them dramatically."
+            "a single additional correct or incorrect prediction can shift them dramatically.<br><br>"
+
+            "<b style='font-size:13px'>RMSE</b>  (regression only)<br>"
+            "Root Mean Squared Error — average prediction error in Pb% units.  "
+            "Penalises large errors more than small ones.  Lower is better.<br><br>"
+
+            "<b style='font-size:13px'>MAE</b>  (regression only)<br>"
+            "Mean Absolute Error — average absolute prediction error in Pb% units.  "
+            "More robust to large outlier errors than RMSE.  Lower is better.<br><br>"
+
+            "<b style='font-size:13px'>R²</b>  (regression only)<br>"
+            "Coefficient of determination.  "
+            "1.0 = perfect predictions; 0.0 = no better than predicting the mean; "
+            "negative = worse than the mean baseline.  Higher is better."
         )
         glossary_lbl.setWordWrap(True)
         glossary_lbl.setTextFormat(Qt.RichText)
-        glossary_lbl.setStyleSheet("font-size:11px; color:#333; line-height:150%;")
-        glossary_v.addWidget(glossary_lbl)
-        self._perf_v.addWidget(grp_glossary)
-        self._perf_v.addStretch()
+        glossary_lbl.setStyleSheet("font-size:11px; color:#333; line-height:160%;")
+        glossary_inner.addWidget(glossary_lbl)
+        glossary_inner.addStretch()
 
-        self.chart_tabs.addTab(perf_w, "Performance Evaluation")
+        self.chart_tabs.addTab(glossary_w, "Metric Glossary")
 
         splitter.setSizes([300, 500])
         self._draw_placeholder()
@@ -775,30 +773,22 @@ class ResultsPanel(QWidget):
 
             if acc >= 0.70:
                 color      = "#1b5e20"
-                bar_color  = "#4CAF50"
-                result_txt = f"✓  PASS — model meets the ≥ 70% accuracy goal"
+                result_txt = "✓  Meets the ≥ 70% accuracy target"
             elif acc >= 0.60:
                 color      = "#e65100"
-                bar_color  = "#FF9800"
                 gap        = (0.70 - acc) * 100
-                result_txt = f"⚠  Close — {gap:.1f} percentage points below the goal"
+                result_txt = f"⚠  {gap:.1f} pp below target — close"
             else:
                 color      = "#b71c1c"
-                bar_color  = "#f44336"
                 gap        = (0.70 - acc) * 100
-                result_txt = f"✗  FAIL — {gap:.1f} percentage points below the goal"
+                result_txt = f"✗  {gap:.1f} pp below the 70% target"
 
             self.lbl_thesis_acc.setStyleSheet(
-                f"color:{color}; font-size:42px; font-weight:bold;"
+                f"color:{color}; font-size:46px; font-weight:bold;"
             )
-            self.pb_thesis.setStyleSheet(
-                f"QProgressBar{{border:1px solid #ccc;border-radius:4px;background:#eee;}}"
-                f"QProgressBar::chunk{{background:{bar_color};border-radius:4px;}}"
-            )
-            self.pb_thesis.setValue(int(min(pct, 100)))
             self.lbl_thesis_result.setText(result_txt)
             self.lbl_thesis_result.setStyleSheet(
-                f"font-size:14px; font-weight:bold; color:{color}; margin-top:4px;"
+                f"font-size:15px; font-weight:bold; color:{color};"
             )
 
             # ── Metrics table ─────────────────────────────────────────────
