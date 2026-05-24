@@ -3,7 +3,7 @@ import itertools
 import datetime
 from typing import List, Dict
 
-from qtpy.QtCore import QThread, Signal
+from qtpy.QtCore import QThread, Signal, Qt
 
 from .trainer import TrainingWorker
 
@@ -76,26 +76,33 @@ class GridSearchWorker(QThread):
                 worker = TrainingWorker(self.config, run_params=params, run_id=run_id)
                 self._current_worker = worker
 
-                # Connect relay signals
-                worker.log.connect(self.run_log)
-                worker.progress.connect(lambda ep, tot, _i=i, _t=total: self.run_progress.emit(_i + 1, _t, ep, tot))
-                worker.epoch_metrics.connect(self.epoch_metrics)
-
-                result_holder = []
-
-                def _on_done(res, holder=result_holder):
-                    holder.append(res)
-
-                def _on_err(msg, holder=result_holder):
-                    holder.append({"error": msg})
-
-                worker.finished.connect(_on_done)
-                worker.error.connect(_on_err)
+                # Use Qt.DirectConnection so relay signals fire in the TrainingWorker
+                # thread rather than being queued to GridSearchWorker's thread.
+                # GridSearchWorker has no running event loop (it blocks on worker.wait()),
+                # so queued signals to it would never be delivered — causing the epoch
+                # bar to freeze and result_holder to stay empty.
+                # With DirectConnection the relay runs in the emitter's thread, and from
+                # there each GridSearchWorker signal is re-queued normally to the main
+                # thread's event loop (which IS running), so the UI stays live.
+                worker.log.connect(self.run_log, Qt.DirectConnection)
+                worker.progress.connect(
+                    lambda ep, tot, _i=i, _t=total: self.run_progress.emit(_i + 1, _t, ep, tot),
+                    Qt.DirectConnection,
+                )
+                worker.epoch_metrics.connect(self.epoch_metrics, Qt.DirectConnection)
 
                 worker.start()
                 worker.wait()
 
-                res = result_holder[0] if result_holder else {"error": "No result"}
+                # Read the result directly from the worker object — TrainingWorker.run()
+                # stores _result/_error on self before returning, so they are guaranteed
+                # to be set by the time wait() returns (no event loop needed).
+                if worker._result is not None:
+                    res = worker._result
+                elif worker._error is not None:
+                    res = {"error": worker._error}
+                else:
+                    res = {"error": "No result"}
                 results.append(res)
 
                 # ── Save immediately in the worker thread (crash-safe) ──────

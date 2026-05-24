@@ -52,12 +52,19 @@ class TrainingWorker(QThread):
 
     # ------------------------------------------------------------------
     def run(self):
+        # Store result/error directly on self so GridSearchWorker can read them
+        # after worker.wait() without depending on queued signal delivery.
+        self._result = None
+        self._error = None
         try:
             result = self._train()
+            self._result = result
             self.finished.emit(result)
         except Exception as exc:
             import traceback
-            self.error.emit(traceback.format_exc())
+            tb = traceback.format_exc()
+            self._error = tb
+            self.error.emit(tb)
 
     def _train(self) -> dict:
         cfg = self.config
