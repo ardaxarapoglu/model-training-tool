@@ -623,13 +623,29 @@ class TrainingPanel(QWidget):
 
     def _on_gs_run_finished(self, run_num: int, result: dict):
         self.pbar_runs.setValue(run_num)
+        # Add this run's result to the panel immediately — don't wait for all
+        # runs to finish.  This way the user sees each result as it completes,
+        # and a crash mid-grid-search doesn't lose the already-completed rows.
+        mw = self.window()
+        if hasattr(mw, "res_panel"):
+            mw.res_panel.set_output_dir(self.edit_out_dir.text())
+            mw.res_panel.add_result(result)
 
     def _on_single_done(self, result: dict):
         self.pbar_runs.setValue(1)
         self._training_finished([result])
 
     def _on_all_done(self, results: list):
-        self._training_finished(results)
+        # Individual results were already added to the panel one by one in
+        # _on_gs_run_finished, so we only need to finalize the UI here.
+        self.lbl_status.setText(f"Grid search done  ({len(results)} run(s))")
+        self.btn_run.setEnabled(True)
+        self.btn_stop.setEnabled(False)
+        mw = self.window()
+        if hasattr(mw, "tabs") and hasattr(mw, "res_panel"):
+            mw.tabs.setCurrentWidget(mw.res_panel)
+        if hasattr(mw, "lbl_status"):
+            mw.lbl_status.setText(f"Grid search complete — {len(results)} run(s)")
 
     def _on_error(self, msg: str):
         self.log_edit.append(f"\n[ERROR]\n{msg}")

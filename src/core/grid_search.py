@@ -97,6 +97,17 @@ class GridSearchWorker(QThread):
 
                 res = result_holder[0] if result_holder else {"error": "No result"}
                 results.append(res)
+
+                # ── Save immediately in the worker thread (crash-safe) ──────
+                # If the app crashes before all_done fires, each completed run
+                # is already on disk and can be loaded via "Load Previous Runs".
+                try:
+                    from ..utils.results_saver import save_result
+                    out_dir = self.config["training"].get("output_dir", "./results")
+                    save_result(res, out_dir)
+                except Exception:
+                    pass   # never let a save failure abort the grid search
+
                 self.run_finished.emit(i + 1, res)
 
             self.all_done.emit(results)
