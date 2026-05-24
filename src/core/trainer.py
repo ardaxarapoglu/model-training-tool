@@ -318,7 +318,7 @@ class TrainingWorker(QThread):
                     f"R²={final_test_metrics.get('r2', 0):.4f}"
                 )
 
-        return {
+        result = {
             "run_id": self.run_id,
             "mode": mode_label,
             "class_names": [c.get("name", str(i)) for i, c in enumerate(classes)] if is_cls else [],
@@ -334,6 +334,25 @@ class TrainingWorker(QThread):
             "n_val": len(val_samples),
             "n_test": len(test_samples),
         }
+
+        # Explicitly release GPU tensors.  Python's cyclic GC may not run between
+        # grid-search iterations, so without this each run's model stays in VRAM
+        # and eventually causes an out-of-memory crash.
+        del model, optimizer, criterion, train_loader
+        if val_loader is not None:
+            del val_loader
+        if test_loader is not None:
+            del test_loader
+        if scaler is not None:
+            del scaler
+        if scheduler is not None:
+            del scheduler
+        if device.type == "cuda":
+            import gc as _gc
+            _gc.collect()
+            torch.cuda.empty_cache()
+
+        return result
 
     @staticmethod
     def _resolve_params(t_cfg: dict, overrides: dict) -> dict:

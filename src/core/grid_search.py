@@ -120,6 +120,7 @@ class GridSearchWorker(QThread):
                     )
 
                 self.run_finished.emit(i + 1, res)
+                self._current_worker = None  # drop reference so the worker can be GC'd
 
             self.all_done.emit(results)
 
