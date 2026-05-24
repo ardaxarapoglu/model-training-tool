@@ -15,49 +15,56 @@
           "pb_concentration": 70.464,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y1",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 70.908,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y2",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 58.315,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y3",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 15.717,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y4",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 7.14,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y5",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 1.745,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y6",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 3.815,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y7",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         }
       ]
     },
@@ -75,43 +82,50 @@
           "name": "Y1",
           "pb_concentration": 43.555,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 21.463,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 19.903,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 14.017,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.549,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 1.869,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.289,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -129,43 +143,50 @@
           "name": "Y1",
           "pb_concentration": 39.58,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 30.426,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 16.035,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.429,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.465,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.566,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.544,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -183,43 +204,50 @@
           "name": "Y1",
           "pb_concentration": 34.806,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 28.721,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 15.013,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.98,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 2.624,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 1.966,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.533,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -230,7 +258,7 @@
       "experiment_no": "07",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
-      "split": "validation",
+      "split": "train",
       "notes": "",
       "time_frames": [
         {
@@ -238,49 +266,56 @@
           "pb_concentration": 39.831,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y1",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 34.494,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y2",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 25.26,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y3",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 16.204,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y4",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 6.651,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y5",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.514,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y6",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.74,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y7",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         }
       ]
     },
@@ -291,7 +326,7 @@
       "experiment_no": "08",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
-      "split": "test",
+      "split": "train",
       "notes": "",
       "time_frames": [
         {
@@ -299,49 +334,56 @@
           "pb_concentration": 35.511,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y1",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 32.906,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y2",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 29.638,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y3",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 20.444,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y4",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 5.642,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y5",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.572,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y6",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.792,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y7",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "train"
         }
       ]
     },
@@ -359,43 +401,50 @@
           "name": "Y1",
           "pb_concentration": 34.884,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 22.904,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 19.59,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 13.306,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 6.018,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 3.42,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 2.879,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -406,50 +455,64 @@
       "experiment_no": "10",
       "date": "2026-03-17 00:00:00",
       "operator": "Arda - Burak",
-      "split": "train",
+      "split": "validation",
       "notes": "",
       "time_frames": [
         {
           "name": "Y1",
           "pb_concentration": 57.696,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y1",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y2",
           "pb_concentration": 31.841,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y2",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y3",
           "pb_concentration": 17.167,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y3",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y4",
           "pb_concentration": 7.743,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y4",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.581,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y5",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.775,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y6",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.702,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y7",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "validation"
         }
       ]
     },
@@ -467,43 +530,50 @@
           "name": "Y1",
           "pb_concentration": 45.156,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "test"
         },
         {
           "name": "Y2",
           "pb_concentration": 33.175,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 14.524,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 8.774,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 4.327,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.894,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.968,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -521,43 +591,50 @@
           "name": "Y1",
           "pb_concentration": 50.259,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "validation"
         },
         {
           "name": "Y2",
           "pb_concentration": 19.982,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 7.897,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 5.393,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.929,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.793,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.704,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -575,43 +652,50 @@
           "name": "Y1",
           "pb_concentration": 62.141,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "validation"
         },
         {
           "name": "Y2",
           "pb_concentration": 40.181,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 15.067,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 7.418,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.917,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.545,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.744,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -622,50 +706,64 @@
       "experiment_no": "14",
       "date": "2026-03-18 00:00:00",
       "operator": "Arda - Burak",
-      "split": "train",
+      "split": "test",
       "notes": "",
       "time_frames": [
         {
           "name": "Y1",
           "pb_concentration": 60.825,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y1",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y2",
           "pb_concentration": 37.377,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y2",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y3",
           "pb_concentration": 17.566,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y3",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y4",
           "pb_concentration": 9.079,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y4",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y5",
           "pb_concentration": 2.694,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y5",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.751,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y6",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.738,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y7",
-          "notes": ""
+          "notes": "",
+          "time_interval": "",
+          "split": "test"
         }
       ]
     },
@@ -683,43 +781,50 @@
           "name": "Y1",
           "pb_concentration": 51.748,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y1",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 20.013,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y2",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 9.897,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y3",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.686,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y4",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.366,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y5",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 3.355,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y6",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.873,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y7",
-          "notes": ""
+          "notes": "",
+          "split": "train"
         }
       ]
     },
@@ -738,49 +843,56 @@
           "pb_concentration": 45.257,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y1",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y2",
           "pb_concentration": 21.868,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y2",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y3",
           "pb_concentration": 8.421,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y3",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.554,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y4",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y5",
           "pb_concentration": 2.945,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y5",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.672,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y6",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "validation"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.869,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y7",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "validation"
         }
       ]
     },
@@ -799,49 +911,56 @@
           "pb_concentration": 46.649,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y1",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y2",
           "pb_concentration": 19.029,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y2",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y3",
           "pb_concentration": 9.196,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y3",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y4",
           "pb_concentration": 4.397,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y4",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y5",
           "pb_concentration": 2.523,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y5",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.043,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y6",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "test"
         },
         {
           "name": "Y7",
           "pb_concentration": 2.336,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y7",
           "notes": "",
-          "time_interval": ""
+          "time_interval": "",
+          "split": "test"
         }
       ]
     }
@@ -980,58 +1099,58 @@
     ]
   },
   "training": {
-    "epochs": 30,
-    "batch_size": {
-      "value": "16",
-      "values": "16,32",
+    "architecture": {
+      "value": "ResNet-18",
+      "values": "ResNet-18,ResNet-34,ResNet-50,ResNet-101,VGG-16,VGG-19,DenseNet-121,DenseNet-169,MobileNet-V2,MobileNet-V3-Small,MobileNet-V3-Large,EfficientNet-B0,EfficientNet-B3,EfficientNet-B7",
       "use_grid": true
+    },
+    "pretrained": true,
+    "freeze_backbone": true,
+    "unfreeze_last_n": 0,
+    "dropout_head": 0.2,
+    "epochs": 50,
+    "batch_size": {
+      "value": "64",
+      "values": "16,32",
+      "use_grid": false
     },
     "learning_rate": {
       "value": "0.001",
       "values": "0.001,0.0001,0.00001",
-      "use_grid": true
+      "use_grid": false
     },
     "optimizer": {
       "value": "Adam",
       "values": "Adam,AdamW",
-      "use_grid": true
+      "use_grid": false
     },
     "weight_decay": {
-      "value": "1e-4",
+      "value": "0.0001",
       "values": "",
       "use_grid": false
     },
     "loss": {
-      "value": "MSE",
+      "value": "MAE",
       "values": "",
       "use_grid": false
     },
     "momentum": 0.9,
     "lr_scheduler": {
-      "type": "StepLR",
+      "type": "None",
       "step_size": 10,
       "gamma": 0.5,
       "t_max": 30,
-      "patience": 4,
+      "patience": 5,
       "min_lr": 1e-07
     },
     "early_stopping": {
       "enabled": true,
-      "patience": 6,
+      "patience": 10,
       "min_delta": 0.0001
     },
-    "grid_search_enabled": false,
+    "grid_search_enabled": true,
     "output_dir": "./results",
     "num_workers": 0,
-    "use_amp": false,
-    "architecture": {
-      "value": "ResNet-18",
-      "values": "ResNet-50,EfficientNet-B0,EfficientNet-B3,MobileNet-V3-Large",
-      "use_grid": true
-    },
-    "pretrained": true,
-    "freeze_backbone": false,
-    "unfreeze_last_n": 0,
-    "dropout_head": 0.5
+    "use_amp": true
   }
 }

@@ -605,7 +605,7 @@ class ResultsPanel(QWidget):
     # ------------------------------------------------------------------ loss curves
     def _draw_loss_curves(self, r: dict):
         train_h = r.get("train_history", [])
-        val_h   = r.get("val_history", r.get("test_history", []))   # backward-compat alias
+        val_h   = r.get("val_history", [])
 
         self.ax_loss.clear()
         epochs = list(range(1, len(train_h) + 1))

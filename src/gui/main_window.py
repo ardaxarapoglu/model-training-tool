@@ -275,18 +275,6 @@ class MainWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
 
-        # Test-set isolation notice (test = held out, evaluated once at the end)
-        experiments = cfg.get("experiments", [])
-        test_exps = [e for e in experiments if e.get("split") == "test"]
-        if test_exps:
-            QMessageBox.information(
-                self,
-                "Test Set Isolated",
-                f"{len(test_exps)} test experiment(s) are held out.\n"
-                "They will NOT be used during training or model selection.\n"
-                "They are evaluated exactly once at the very end of each run.",
-            )
-
         # Auto-export label CSV to output dir before starting
         out_dir = cfg["training"].get("output_dir", "./results")
         csv_path = os.path.join(out_dir, "labels.csv")
@@ -332,7 +320,7 @@ class MainWindow(QMainWindow):
         for exp in experiments:
             for tf in exp.get("time_frames", []):
                 folder = tf.get("folder_path", "")
-                if folder and not __import__("os").path.isdir(folder):
+                if folder and not os.path.isdir(folder):
                     missing_folders.append(
                         f"{exp.get('id','?')} / {tf.get('name','?')}: {folder}"
                     )

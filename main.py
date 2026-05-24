@@ -8,9 +8,11 @@ from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import Qt
 
 from src.gui.main_window import MainWindow
+from src.utils.crash_reporter import install as _install_crash_reporter
 
 
 def main():
+    _install_crash_reporter("./crashes")
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 

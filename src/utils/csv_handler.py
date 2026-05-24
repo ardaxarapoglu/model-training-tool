@@ -49,7 +49,7 @@ def _build_rows(experiments: list, classes: list = None) -> list:
     rows = []
     for exp in experiments:
         exp_id = exp.get("id", "")
-        split = exp.get("split", "train")
+        exp_split = exp.get("split", "train")   # fallback when TF has no split field
         for tf in exp.get("time_frames", []):
             folder = tf.get("folder_path", "")
             if not folder or not os.path.isdir(folder):
@@ -57,12 +57,12 @@ def _build_rows(experiments: list, classes: list = None) -> list:
             pb = tf.get("pb_concentration", 0.0)
             n_imgs = _count_images(folder)
             row = {
-                "experiment":      exp_id,
-                "time_frame":      tf.get("name", ""),
-                "folder_path":     folder,
+                "experiment":       exp_id,
+                "time_frame":       tf.get("name", ""),
+                "folder_path":      folder,
                 "pb_concentration": pb,
-                "num_images":      n_imgs,
-                "split":           split,
+                "num_images":       n_imgs,
+                "split":            tf.get("split", exp_split),  # TF-level overrides exp-level
             }
             if classes:
                 row["class_label"] = _pb_to_class(float(pb), classes)
@@ -74,7 +74,7 @@ def count_images(experiments: list) -> dict:
     """Return {split: count} dict of available images per split."""
     counts = {"train": 0, "test": 0, "validation": 0}
     for exp in experiments:
-        split = exp.get("split", "train")
+        exp_split = exp.get("split", "train")   # fallback when TF has no split field
         for tf in exp.get("time_frames", []):
             folder = tf.get("folder_path", "")
             if folder and os.path.isdir(folder):
@@ -83,5 +83,6 @@ def count_images(experiments: list) -> dict:
                     for f in os.listdir(folder)
                     if os.path.splitext(f)[1].lower() in IMAGE_EXTS
                 )
+                split = tf.get("split", exp_split)  # TF-level overrides exp-level
                 counts[split] = counts.get(split, 0) + n
     return counts

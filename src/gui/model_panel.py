@@ -73,7 +73,8 @@ class ModelPanel(QWidget):
         self.tbl_classes.setHorizontalHeaderLabels(["Class Name", "Upper Bound (%)"])
         self.tbl_classes.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.tbl_classes.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.tbl_classes.setMaximumHeight(160)
+        self.tbl_classes.setMinimumHeight(280)
+        self.tbl_classes.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
         self.tbl_classes.verticalHeader().setVisible(False)
         ce_v.addWidget(self.tbl_classes)
 

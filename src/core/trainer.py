@@ -1,4 +1,9 @@
-"""QThread-based training worker.  Validation set is NEVER used during training."""
+"""QThread-based training worker.
+
+Validation split is monitored each epoch (early stopping / LR scheduling)
+but is NEVER used for weight updates.  Test split is evaluated exactly once
+after training ends and is never touched during the training loop.
+"""
 import os
 import time
 import math
@@ -153,7 +158,7 @@ class TrainingWorker(QThread):
                                  num_workers=num_workers, pin_memory=pin_mem,
                                  persistent_workers=(num_workers > 0)) if test_ds else None
 
-        scaler = torch.cuda.amp.GradScaler() if use_amp else None
+        scaler = torch.amp.GradScaler('cuda') if use_amp else None
 
         # Loss
         if is_cls:
@@ -282,7 +287,7 @@ class TrainingWorker(QThread):
 
         # Load best checkpoint
         if os.path.exists(best_ckpt):
-            model.load_state_dict(torch.load(best_ckpt, map_location=device))
+            model.load_state_dict(torch.load(best_ckpt, map_location=device, weights_only=True))
 
         # Final eval on validation set (the monitoring split)
         final_val_metrics = {}
@@ -350,7 +355,7 @@ def _train_epoch_reg(model, loader, optimizer, criterion, device, scaler=None):
     total_loss = 0.0
     for imgs, labels in loader:
         imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True).unsqueeze(1)
-        optimizer.zero_grad()
+        optimizer.zero_grad(set_to_none=True)   # faster than zeroing — frees memory
         if scaler is not None:
             with torch.amp.autocast('cuda'):
                 preds = model(imgs)
@@ -404,7 +409,7 @@ def _train_epoch_cls(model, loader, optimizer, criterion, device, scaler=None):
     total_loss = 0.0
     for imgs, labels in loader:
         imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True)
-        optimizer.zero_grad()
+        optimizer.zero_grad(set_to_none=True)   # faster than zeroing — frees memory
         if scaler is not None:
             with torch.amp.autocast('cuda'):
                 logits = model(imgs)

@@ -10,17 +10,10 @@ from qtpy.QtWidgets import (
     QFrame, QToolBar, QSizePolicy,
 )
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QColor, QFont
+from qtpy.QtGui import QFont
 
 
 SPLITS = ["train", "validation", "test"]
-# validation = watched during training (early stopping / LR scheduling)
-# test       = held out, evaluated exactly once at the end
-SPLIT_COLORS = {
-    "train":      QColor("#c8e6c9"),   # green
-    "validation": QColor("#fff9c4"),   # yellow  – active during training
-    "test":       QColor("#b3e5fc"),   # blue    – final hold-out
-}
 N_FRAMES = 7
 
 
@@ -124,12 +117,14 @@ class ExperimentsPanel(QWidget):
         for s in SPLITS:
             self.cmb_split.addItem(_SPLIT_LABELS[s], s)
         self.cmb_split.setToolTip(
+            "Sets ALL time frames of this experiment to the chosen split at once.\n"
+            "You can then override individual frames using the Split column in the table below.\n\n"
             "Train      – images used to update model weights every epoch.\n"
             "Validation – monitored after each epoch for early stopping and LR scheduling.\n"
             "Test       – NEVER seen during training; evaluated once for the final report."
         )
-        self.cmb_split.currentIndexChanged.connect(self._save_current)
-        basic.addRow("Assigned to:", self.cmb_split)
+        self.cmb_split.currentIndexChanged.connect(self._on_exp_split_changed)
+        basic.addRow("Set all frames to:", self.cmb_split)
 
         self.edit_notes = QLineEdit()
         self.edit_notes.setPlaceholderText("Optional notes")
@@ -158,9 +153,9 @@ class ExperimentsPanel(QWidget):
         tf_lbl.setFont(QFont("Arial", 10, QFont.Bold))
         fv.addWidget(tf_lbl)
 
-        self.tf_table = QTableWidget(N_FRAMES, 5)
+        self.tf_table = QTableWidget(N_FRAMES, 6)
         self.tf_table.setHorizontalHeaderLabels(
-            ["Frame", "Time Interval", "Folder", "Pb Tenörü (%)", "Notes"]
+            ["Frame", "Time Interval", "Folder", "Pb Tenörü (%)", "Notes", "Split"]
         )
         hh = self.tf_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeToContents)
@@ -168,8 +163,10 @@ class ExperimentsPanel(QWidget):
         hh.setSectionResizeMode(2, QHeaderView.Stretch)
         hh.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         hh.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        hh.setSectionResizeMode(5, QHeaderView.ResizeToContents)
         self.tf_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tf_table.setMinimumHeight(220)
+        self.tf_table.setMinimumHeight(160)
+        self.tf_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         for i in range(N_FRAMES):
             name_item = QTableWidgetItem(f"Y{i+1}")
@@ -190,8 +187,11 @@ class ExperimentsPanel(QWidget):
 
             self.tf_table.setItem(i, 4, QTableWidgetItem(""))
 
+            split_cmb = self._make_split_combo()
+            self.tf_table.setCellWidget(i, 5, split_cmb)
+
         self.tf_table.itemChanged.connect(self._save_current)
-        fv.addWidget(self.tf_table)
+        fv.addWidget(self.tf_table, stretch=1)
 
         auto_row = QHBoxLayout()
         btn_auto = QPushButton("Auto-detect folders from root")
@@ -203,10 +203,36 @@ class ExperimentsPanel(QWidget):
         auto_row.addStretch()
         fv.addLayout(auto_row)
 
-        rv.addWidget(self.grp_form)
-        rv.addStretch()
+        rv.addWidget(self.grp_form, stretch=1)
         splitter.addWidget(right)
         splitter.setSizes([260, 900])
+
+    # ---------------------------------------------------------------- split helpers
+    def _make_split_combo(self):
+        cmb = QComboBox()
+        _LABELS = {"train": "Train", "validation": "Validation", "test": "Test"}
+        for s in SPLITS:
+            cmb.addItem(_LABELS[s], s)
+        cmb.currentIndexChanged.connect(self._save_current)
+        return cmb
+
+    def _tf_split(self, row):
+        return self.tf_table.cellWidget(row, 5)
+
+    def _on_exp_split_changed(self):
+        """Bulk-set all time frame splits to match the experiment-level combo."""
+        if self._loading:
+            return
+        split = self.cmb_split.currentData()
+        for i in range(N_FRAMES):
+            cmb = self._tf_split(i)
+            if cmb:
+                cmb.blockSignals(True)
+                idx = cmb.findData(split)
+                if idx >= 0:
+                    cmb.setCurrentIndex(idx)
+                cmb.blockSignals(False)
+        self._save_current()
 
     # ---------------------------------------------------------------- folder widget
     def _make_folder_widget(self, row):
@@ -262,9 +288,7 @@ class ExperimentsPanel(QWidget):
     def _auto_detect(self):
         if self._current_idx < 0:
             return
-        root, _ = QFileDialog.getExistingDirectory(self, "Select experiment root folder"), None
-        if not root:
-            root = QFileDialog.getExistingDirectory(self, "Select experiment root folder")
+        root = QFileDialog.getExistingDirectory(self, "Select experiment root folder")
         if not root:
             return
         subdirs = sorted(
@@ -336,6 +360,7 @@ class ExperimentsPanel(QWidget):
                     "pb_distribution": 0.0,
                     "folder_path": "",
                     "notes": "",
+                    "split": "train",
                 }
                 for i in range(N_FRAMES)
             ],
@@ -344,7 +369,6 @@ class ExperimentsPanel(QWidget):
     def _add_list_item(self, exp):
         item = QListWidgetItem(exp["name"])
         item.setData(Qt.UserRole, exp["id"])
-        item.setBackground(SPLIT_COLORS.get(exp.get("split", "train"), QColor("white")))
         self.exp_list.addItem(item)
 
     def _remove_experiment(self):
@@ -391,6 +415,7 @@ class ExperimentsPanel(QWidget):
         split_idx = self.cmb_split.findData(exp.get("split", "train"))
         self.cmb_split.setCurrentIndex(max(0, split_idx))
 
+        exp_split = exp.get("split", "train")
         for i, tf in enumerate(exp.get("time_frames", [])[:N_FRAMES]):
             item_interval = self.tf_table.item(i, 1)
             if item_interval:
@@ -411,6 +436,14 @@ class ExperimentsPanel(QWidget):
             item_notes = self.tf_table.item(i, 4)
             if item_notes:
                 item_notes.setText(tf.get("notes", ""))
+
+            cmb = self._tf_split(i)
+            if cmb:
+                cmb.blockSignals(True)
+                tf_split = tf.get("split", exp_split)
+                idx = cmb.findData(tf_split)
+                cmb.setCurrentIndex(max(0, idx))
+                cmb.blockSignals(False)
 
     def _apply_form_info(self, info: dict):
         """Apply parsed form data to the current UI state."""
@@ -450,21 +483,27 @@ class ExperimentsPanel(QWidget):
             item_n = self.tf_table.item(i, 4)
             if item_n:
                 tf["notes"] = item_n.text()
+            cmb = self._tf_split(i)
+            if cmb:
+                tf["split"] = cmb.currentData()
 
         # Refresh list item
         item = self.exp_list.item(self._current_idx)
         if item:
             item.setText(exp["name"])
-            item.setBackground(SPLIT_COLORS.get(exp["split"], QColor("white")))
 
         self._update_summary()
         self.experiments_changed.emit()
 
     def _update_summary(self):
         from collections import Counter
-        c = Counter(e.get("split", "train") for e in self._experiments)
+        c = Counter()
+        for exp in self._experiments:
+            exp_split = exp.get("split", "train")
+            for tf in exp.get("time_frames", []):
+                c[tf.get("split", exp_split)] += 1
         self.lbl_summary.setText(
-            f"Train: {c['train']}  Val: {c['validation']}  Test: {c['test']}"
+            f"Train: {c['train']}  Val: {c['validation']}  Test: {c['test']}  (time frames)"
         )
 
     # ---------------------------------------------------------------- public API
@@ -487,6 +526,7 @@ class ExperimentsPanel(QWidget):
                     "name": f"Y{len(tfs)+1}",
                     "time_interval": "", "pb_concentration": 0.0,
                     "pb_distribution": 0.0, "folder_path": "", "notes": "",
+                    "split": exp.get("split", "train"),
                 })
             exp["time_frames"] = tfs[:N_FRAMES]
             self._experiments.append(exp)

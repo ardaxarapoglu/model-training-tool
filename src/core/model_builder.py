@@ -95,6 +95,9 @@ def _unfreeze_head(model, arch_id):
     elif arch_id.startswith(("mobilenet", "efficientnet")):
         for p in model.classifier.parameters():
             p.requires_grad = True
+    else:
+        import warnings
+        warnings.warn(f"_unfreeze_head: unknown arch_id '{arch_id}' — head not unfrozen")
 
 
 def _unfreeze_last_n_layers(model, n):

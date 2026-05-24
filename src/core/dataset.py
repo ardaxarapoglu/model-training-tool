@@ -65,9 +65,12 @@ def collect_samples(experiments: list, split: str, class_cfg: dict = None) -> li
     classes = class_cfg.get("classes", []) if use_cls else []
     samples = []
     for exp in experiments:
-        if exp.get("split") != split:
-            continue
+        exp_split = exp.get("split", "train")   # experiment-level fallback
         for tf in exp.get("time_frames", []):
+            # Time-frame split takes priority; fall back to experiment split
+            tf_split = tf.get("split", exp_split)
+            if tf_split != split:
+                continue
             folder = tf.get("folder_path", "")
             if not folder or not os.path.isdir(folder):
                 continue

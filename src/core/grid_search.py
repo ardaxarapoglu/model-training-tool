@@ -106,7 +106,11 @@ class GridSearchWorker(QThread):
                     out_dir = self.config["training"].get("output_dir", "./results")
                     save_result(res, out_dir)
                 except Exception:
-                    pass   # never let a save failure abort the grid search
+                    import traceback as _tb
+                    self.run_log.emit(
+                        f"[WARNING] Could not save result for run {i+1} to disk:\n"
+                        + _tb.format_exc(limit=3)
+                    )
 
                 self.run_finished.emit(i + 1, res)
 

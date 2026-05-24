@@ -598,18 +598,25 @@ class TrainingPanel(QWidget):
         self.pbar_epoch.setRange(0, total)
         self.pbar_epoch.setValue(epoch)
 
+    @staticmethod
+    def _set_metric(widget, text: str):
+        """Null-safe helper: find the 'value' child label and set its text."""
+        lbl = widget.findChild(QLabel, "value")
+        if lbl is not None:
+            lbl.setText(text)
+
     def _on_epoch_metrics(self, m: dict):
-        self.lbl_train_loss.findChild(QLabel, "value").setText(f"{m.get('train_loss', 0):.4f}")
+        self._set_metric(self.lbl_train_loss, f"{m.get('train_loss', 0):.4f}")
         vl = m.get("val_loss")
-        self.lbl_val_loss.findChild(QLabel, "value").setText(f"{vl:.4f}" if vl is not None else "—")
+        self._set_metric(self.lbl_val_loss,  f"{vl:.4f}" if vl is not None else "—")
         vr = m.get("val_rmse")
-        self.lbl_val_rmse.findChild(QLabel, "value").setText(f"{vr:.4f}" if vr is not None else "—")
+        self._set_metric(self.lbl_val_rmse,  f"{vr:.4f}" if vr is not None else "—")
         vm = m.get("val_mae")
-        self.lbl_val_mae.findChild(QLabel, "value").setText(f"{vm:.4f}" if vm is not None else "—")
+        self._set_metric(self.lbl_val_mae,   f"{vm:.4f}" if vm is not None else "—")
         va = m.get("val_accuracy")
-        self.lbl_val_acc.findChild(QLabel, "value").setText(f"{va:.3f}" if va is not None else "—")
+        self._set_metric(self.lbl_val_acc,   f"{va:.3f}" if va is not None else "—")
         vf = m.get("val_f1")
-        self.lbl_val_f1.findChild(QLabel, "value").setText(f"{vf:.3f}" if vf is not None else "—")
+        self._set_metric(self.lbl_val_f1,    f"{vf:.3f}" if vf is not None else "—")
 
     def _on_gs_run_started(self, run_num: int, total: int, params: dict):
         self.lbl_run_progress.setText(f"Run {run_num} / {total}")
@@ -652,6 +659,13 @@ class TrainingPanel(QWidget):
         self.lbl_status.setText("Error — see log")
         self.btn_run.setEnabled(True)
         self.btn_stop.setEnabled(False)
+        try:
+            from ..utils.crash_reporter import log_worker_crash
+            worker = getattr(self, "_worker", None) or getattr(self, "_gs_worker", None)
+            run_id = getattr(worker, "run_id", "unknown") if worker else "unknown"
+            log_worker_crash(run_id, msg)
+        except Exception:
+            pass
 
     def _training_finished(self, results: list):
         self.lbl_status.setText(f"Done  ({len(results)} run(s))")
