@@ -531,7 +531,7 @@
           "pb_concentration": 45.156,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y1",
           "notes": "",
-          "split": "test"
+          "split": "train"
         },
         {
           "name": "Y2",
@@ -592,7 +592,7 @@
           "pb_concentration": 50.259,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y1",
           "notes": "",
-          "split": "validation"
+          "split": "train"
         },
         {
           "name": "Y2",
@@ -653,7 +653,7 @@
           "pb_concentration": 62.141,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y1",
           "notes": "",
-          "split": "validation"
+          "split": "train"
         },
         {
           "name": "Y2",
@@ -994,12 +994,12 @@
     },
     "augmentation": {
       "h_flip": {
-        "enabled": false,
-        "p": 0.5
+        "enabled": true,
+        "p": 0.33
       },
       "v_flip": {
-        "enabled": false,
-        "p": 0.5
+        "enabled": true,
+        "p": 0.33
       },
       "rotation": {
         "enabled": true
@@ -1102,53 +1102,53 @@
     "architecture": {
       "value": "ResNet-18",
       "values": "ResNet-18,ResNet-34,ResNet-50,ResNet-101,VGG-16,VGG-19,DenseNet-121,DenseNet-169,MobileNet-V2,MobileNet-V3-Small,MobileNet-V3-Large,EfficientNet-B0,EfficientNet-B3,EfficientNet-B7",
-      "use_grid": true
+      "use_grid": false
     },
     "pretrained": true,
     "freeze_backbone": true,
-    "unfreeze_last_n": 0,
-    "dropout_head": 0.2,
-    "epochs": 50,
+    "unfreeze_last_n": 20,
+    "dropout_head": 0.5,
+    "epochs": 100,
     "batch_size": {
-      "value": "64",
+      "value": "32",
       "values": "16,32",
       "use_grid": false
     },
     "learning_rate": {
-      "value": "0.001",
+      "value": "0.0001",
       "values": "0.001,0.0001,0.00001",
-      "use_grid": false
+      "use_grid": true
     },
     "optimizer": {
       "value": "Adam",
-      "values": "Adam,AdamW",
+      "values": "Adam,AdamW,SGD,RMSprop",
       "use_grid": false
     },
     "weight_decay": {
-      "value": "0.0001",
-      "values": "",
+      "value": "0.001",
+      "values": "0.0001,0.00001",
       "use_grid": false
     },
     "loss": {
-      "value": "MAE",
-      "values": "",
+      "value": "MSE",
+      "values": "MSE,MAE,Huber,SmoothL1",
       "use_grid": false
     },
     "momentum": 0.9,
     "lr_scheduler": {
-      "type": "None",
+      "type": "ReduceLROnPlateau",
       "step_size": 10,
       "gamma": 0.5,
       "t_max": 30,
-      "patience": 5,
-      "min_lr": 1e-07
+      "patience": 8,
+      "min_lr": 1e-06
     },
     "early_stopping": {
       "enabled": true,
-      "patience": 10,
-      "min_delta": 0.0001
+      "patience": 20,
+      "min_delta": 1e-05
     },
-    "grid_search_enabled": true,
+    "grid_search_enabled": false,
     "output_dir": "./results",
     "num_workers": 0,
     "use_amp": true
