@@ -1104,7 +1104,7 @@
     },
     "pretrained": true,
     "freeze_backbone": true,
-    "unfreeze_last_n": 20,
+    "unfreeze_last_n": 5,
     "dropout_head": 0.5,
     "epochs": 100,
     "batch_size": {
