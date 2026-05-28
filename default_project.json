@@ -660,7 +660,7 @@
           "pb_concentration": 62.141,
           "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y1",
           "notes": "",
-          "split": "train",
+          "split": "excluded",
           "time_interval": ""
         },
         {
