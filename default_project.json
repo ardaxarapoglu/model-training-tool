@@ -1098,9 +1098,9 @@
   },
   "training": {
     "architecture": {
-      "value": "ResNet-101",
-      "values": "ResNet-18,ResNet-34,ResNet-50,EfficientNet-B0,EfficientNet-B3,MobileNet-V3-Small,DenseNet-121",
-      "use_grid": false
+      "value": "ResNet-50",
+      "values": "ResNet-18,ResNet-34,ResNet-50,ResNet-101,EfficientNet-B0,EfficientNet-B3,EfficientNet-B7,MobileNet-V2,MobileNet-V3-Small,MobileNet-V3-Large,DenseNet-121",
+      "use_grid": true
     },
     "pretrained": true,
     "freeze_backbone": true,
