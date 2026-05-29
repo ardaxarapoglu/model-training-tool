@@ -55,6 +55,22 @@ _CM_HEADERS = [
      "Colour: green ≥ 0.70 | yellow ≥ 0.40 | red < 0.40"),
 ]
 
+_PERF_HDRS = [
+    ("Metric",           "Name of the evaluation metric"),
+    ("Value",            "Computed value for this run"),
+    ("Rating",           "Qualitative interpretation (see Metric Glossary tab)"),
+    ("What it measures", "One-line description of what this metric captures"),
+]
+
+_PERF_BRIEF = {
+    "Accuracy":          "Correct predictions / total images",
+    "Balanced Accuracy": "Mean recall per class — robust to class imbalance",
+    "Cohen's Kappa":     "Agreement corrected for chance  (0=random, 1=perfect)",
+    "MCC":               "Correlation coeff. for multi-class  (−1 to +1)",
+    "Macro F1":          "Mean F1 per class — equal weight to all classes",
+    "Weighted F1":       "Mean F1 per class — weighted by class sample count",
+}
+
 
 def _compute_cls_perf_metrics(preds: list, labels: list, n_classes: int) -> dict:
     """Compute comprehensive classification performance metrics from predictions and labels."""
@@ -174,6 +190,92 @@ class ResultsPanel(QWidget):
         self.chart_tabs = QTabWidget()
         splitter.addWidget(self.chart_tabs)
 
+        # ── Tab 0: Overview (Confusion Matrix + Performance side-by-side) ─
+        combo_w     = QWidget()
+        combo_outer = QVBoxLayout(combo_w)
+        combo_outer.setContentsMargins(2, 2, 2, 2)
+        combo_split = QSplitter(Qt.Horizontal)
+        combo_outer.addWidget(combo_split)
+
+        # Left — confusion matrix plot
+        combo_cm_w = QWidget()
+        combo_cm_v = QVBoxLayout(combo_cm_w)
+        combo_cm_v.setContentsMargins(0, 0, 0, 0)
+        self.fig_cm_combo    = Figure(figsize=(4, 4), tight_layout=True)
+        self.ax_cm_combo     = self.fig_cm_combo.add_subplot(111)
+        self.canvas_cm_combo = FigureCanvas(self.fig_cm_combo)
+        combo_cm_v.addWidget(self.canvas_cm_combo)
+        combo_split.addWidget(combo_cm_w)
+
+        # Right — performance summary
+        combo_perf_w = QWidget()
+        combo_perf_v = QVBoxLayout(combo_perf_w)
+        combo_perf_v.setContentsMargins(6, 4, 4, 4)
+        combo_perf_v.setSpacing(6)
+
+        self.grp_thesis_combo = QGroupBox("Accuracy  (≥ 70% target)")
+        thesis_combo_h = QHBoxLayout(self.grp_thesis_combo)
+        thesis_combo_h.setSpacing(12)
+        self.lbl_thesis_acc_combo = QLabel("—")
+        self.lbl_thesis_acc_combo.setFont(QFont("Arial", 36, QFont.Bold))
+        self.lbl_thesis_acc_combo.setAlignment(Qt.AlignCenter)
+        self.lbl_thesis_acc_combo.setStyleSheet("color:#555;")
+        self.lbl_thesis_acc_combo.setMinimumWidth(110)
+        thesis_combo_h.addWidget(self.lbl_thesis_acc_combo)
+        self.lbl_thesis_result_combo = QLabel("Select a run to evaluate.")
+        self.lbl_thesis_result_combo.setStyleSheet(
+            "font-size:13px; font-weight:bold; color:#555;"
+        )
+        self.lbl_thesis_result_combo.setWordWrap(True)
+        thesis_combo_h.addWidget(self.lbl_thesis_result_combo, 1)
+        combo_perf_v.addWidget(self.grp_thesis_combo)
+
+        self.grp_metrics_combo = QGroupBox("Classification Metrics")
+        summary_combo_v = QVBoxLayout(self.grp_metrics_combo)
+        summary_combo_v.setContentsMargins(4, 4, 4, 4)
+        self.tbl_perf_combo = QTableWidget(0, 4)
+        for col, (lbl, tip) in enumerate(_PERF_HDRS):
+            hi = QTableWidgetItem(lbl)
+            hi.setToolTip(tip)
+            self.tbl_perf_combo.setHorizontalHeaderItem(col, hi)
+        self.tbl_perf_combo.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.tbl_perf_combo.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.tbl_perf_combo.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.tbl_perf_combo.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.tbl_perf_combo.verticalHeader().setVisible(False)
+        self.tbl_perf_combo.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tbl_perf_combo.setAlternatingRowColors(True)
+        summary_combo_v.addWidget(self.tbl_perf_combo)
+        combo_perf_v.addWidget(self.grp_metrics_combo)
+
+        _cls_hdr_combo = QLabel("Per-class Metrics")
+        _cls_hdr_combo.setFont(QFont("Arial", 9, QFont.Bold))
+        combo_perf_v.addWidget(_cls_hdr_combo)
+
+        self.tbl_cls_metrics_combo = QTableWidget(0, 5)
+        for col, (label, tip) in enumerate(_CM_HEADERS):
+            hitem = QTableWidgetItem(label)
+            hitem.setToolTip(tip)
+            self.tbl_cls_metrics_combo.setHorizontalHeaderItem(col, hitem)
+        self.tbl_cls_metrics_combo.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents
+        )
+        self.tbl_cls_metrics_combo.verticalHeader().setVisible(False)
+        self.tbl_cls_metrics_combo.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tbl_cls_metrics_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        combo_perf_v.addWidget(self.tbl_cls_metrics_combo, 1)
+
+        self.lbl_overall_metrics_combo = QLabel("")
+        self.lbl_overall_metrics_combo.setStyleSheet(
+            "font-size:10px; color:#333; margin-top:2px;"
+        )
+        self.lbl_overall_metrics_combo.setWordWrap(True)
+        combo_perf_v.addWidget(self.lbl_overall_metrics_combo)
+
+        combo_split.addWidget(combo_perf_w)
+        combo_split.setSizes([430, 370])
+        self.chart_tabs.addTab(combo_w, "Overview")
+
         # ── Tab 1: Loss Curves ────────────────────────────────────────────
         loss_w      = QWidget()
         loss_layout = QVBoxLayout(loss_w)
@@ -291,13 +393,7 @@ class ResultsPanel(QWidget):
         summary_v.setContentsMargins(4, 4, 4, 4)
 
         self.tbl_perf = QTableWidget(0, 4)
-        _perf_hdrs = [
-            ("Metric",           "Name of the evaluation metric"),
-            ("Value",            "Computed value for this run"),
-            ("Rating",           "Qualitative interpretation (see Metric Glossary tab)"),
-            ("What it measures", "One-line description of what this metric captures"),
-        ]
-        for col, (lbl, tip) in enumerate(_perf_hdrs):
+        for col, (lbl, tip) in enumerate(_PERF_HDRS):
             hi = QTableWidgetItem(lbl)
             hi.setToolTip(tip)
             self.tbl_perf.setHorizontalHeaderItem(col, hi)
@@ -631,23 +727,20 @@ class ResultsPanel(QWidget):
         self.canvas_loss.draw()
 
     # ------------------------------------------------------------------ confusion matrix
-    def _draw_confusion_matrix(self, r: dict):
-        # Fully reset figure to prevent colorbar accumulation on repeated clicks
-        self.fig_cm.clf()
-        self.ax_cm = self.fig_cm.add_subplot(111)
-        self.tbl_cls_metrics.setRowCount(0)
-        self.lbl_overall_metrics.setText("")
+    def _draw_cm_figure(self, fig, canvas, r):
+        """Draw confusion matrix onto fig (assumed freshly clf'd with one subplot).
+        Returns (cm_array, class_names, total) on success, or None on failure/N/A."""
+        ax = fig.axes[0]
 
         if r.get("mode") != "classification":
-            self.ax_cm.text(
+            ax.text(
                 0.5, 0.5, "Regression run\n(no confusion matrix)",
-                ha="center", va="center", transform=self.ax_cm.transAxes,
+                ha="center", va="center", transform=ax.transAxes,
                 color="#aaa", fontsize=11,
             )
-            self.canvas_cm.draw()
-            return
+            canvas.draw()
+            return None
 
-        # Prefer test (held-out) data; fall back to validation
         tm = r.get("final_test_metrics", {})
         vm = r.get("final_val_metrics",  {})
         preds  = tm.get("predictions") or vm.get("predictions")
@@ -656,13 +749,13 @@ class ResultsPanel(QWidget):
         class_names = r.get("class_names", [])
 
         if not preds or not labels:
-            self.ax_cm.text(
+            ax.text(
                 0.5, 0.5, "No prediction data stored\n(re-train to generate)",
-                ha="center", va="center", transform=self.ax_cm.transAxes,
+                ha="center", va="center", transform=ax.transAxes,
                 color="#aaa", fontsize=11,
             )
-            self.canvas_cm.draw()
-            return
+            canvas.draw()
+            return None
 
         p = np.array(preds,  dtype=int)
         y = np.array(labels, dtype=int)
@@ -674,34 +767,62 @@ class ResultsPanel(QWidget):
             if 0 <= true_i < n and 0 <= pred_i < n:
                 cm[true_i, pred_i] += 1
 
-        im = self.ax_cm.imshow(cm, cmap="Blues", interpolation="nearest")
-        self.ax_cm.set_xticks(range(n))
-        self.ax_cm.set_yticks(range(n))
-        self.ax_cm.set_xticklabels(names, rotation=30, ha="right", fontsize=9)
-        self.ax_cm.set_yticklabels(names, fontsize=9)
-        self.ax_cm.set_xlabel("Predicted", fontsize=9)
-        self.ax_cm.set_ylabel("True", fontsize=9)
-        self.ax_cm.set_title(
+        im = ax.imshow(cm, cmap="Blues", interpolation="nearest")
+        ax.set_xticks(range(n))
+        ax.set_yticks(range(n))
+        ax.set_xticklabels(names, rotation=30, ha="right", fontsize=9)
+        ax.set_yticklabels(names, fontsize=9)
+        ax.set_xlabel("Predicted", fontsize=9)
+        ax.set_ylabel("True", fontsize=9)
+        ax.set_title(
             f"Confusion Matrix ({source}) — {r.get('run_id', '')}",
             fontsize=9, fontweight="bold",
         )
         vmax = cm.max() if cm.max() > 0 else 1
         for i in range(n):
             for j in range(n):
-                self.ax_cm.text(
+                ax.text(
                     j, i, str(cm[i, j]), ha="center", va="center",
                     fontsize=10, fontweight="bold",
                     color="white" if cm[i, j] > vmax * 0.6 else "black",
                 )
-        self.fig_cm.colorbar(im, ax=self.ax_cm, fraction=0.04, pad=0.04)
-        self.fig_cm.tight_layout()
-        self.canvas_cm.draw()
+        fig.colorbar(im, ax=ax, fraction=0.04, pad=0.04)
+        fig.tight_layout()
+        canvas.draw()
+        return cm, names, len(p)
 
-        self._fill_cls_metrics_table(cm, names, len(p))
+    def _draw_confusion_matrix(self, r: dict):
+        # ── Main Confusion Matrix tab ─────────────────────────────────────
+        self.fig_cm.clf()
+        self.ax_cm = self.fig_cm.add_subplot(111)
+        self.tbl_cls_metrics.setRowCount(0)
+        self.lbl_overall_metrics.setText("")
 
-    def _fill_cls_metrics_table(self, cm: np.ndarray, names: list, total: int):
+        result = self._draw_cm_figure(self.fig_cm, self.canvas_cm, r)
+        if result is not None:
+            cm, names, total = result
+            self._fill_cls_metrics_table(
+                self.tbl_cls_metrics, self.lbl_overall_metrics, cm, names, total
+            )
+
+        # ── Overview tab (mirror) ─────────────────────────────────────────
+        self.fig_cm_combo.clf()
+        self.ax_cm_combo = self.fig_cm_combo.add_subplot(111)
+        self.tbl_cls_metrics_combo.setRowCount(0)
+        self.lbl_overall_metrics_combo.setText("")
+
+        result2 = self._draw_cm_figure(self.fig_cm_combo, self.canvas_cm_combo, r)
+        if result2 is not None:
+            cm2, names2, total2 = result2
+            self._fill_cls_metrics_table(
+                self.tbl_cls_metrics_combo, self.lbl_overall_metrics_combo,
+                cm2, names2, total2
+            )
+
+    def _fill_cls_metrics_table(self, tbl: QTableWidget, lbl: QLabel,
+                                 cm: np.ndarray, names: list, total: int):
         n = len(names)
-        self.tbl_cls_metrics.setRowCount(n)
+        tbl.setRowCount(n)
         macro_f1_sum    = 0.0
         weighted_f1_sum = 0.0
 
@@ -729,13 +850,13 @@ class ResultsPanel(QWidget):
                         item.setBackground(QColor("#fff9c4"))
                     else:
                         item.setBackground(QColor("#ffcdd2"))
-                self.tbl_cls_metrics.setItem(i, col, item)
+                tbl.setItem(i, col, item)
 
         correct  = int(np.diag(cm).sum())
         accuracy = correct / max(total, 1)
         macro_f1    = macro_f1_sum    / n
         weighted_f1 = weighted_f1_sum / max(total, 1)
-        self.lbl_overall_metrics.setText(
+        lbl.setText(
             f"Overall  accuracy={accuracy:.3f}  |  "
             f"macro-F1={macro_f1:.3f}  |  "
             f"weighted-F1={weighted_f1:.3f}  |  "
@@ -743,8 +864,10 @@ class ResultsPanel(QWidget):
         )
 
     # ------------------------------------------------------------------ performance eval
-    def _draw_performance_eval(self, r: dict):
-        """Fill the Performance Evaluation tab for the selected run."""
+    def _fill_perf_widgets(self, r: dict,
+                           grp_thesis, lbl_acc, lbl_result,
+                           grp_metrics, tbl_perf):
+        """Populate thesis-goal + metrics table widgets for one result dict."""
         mode = r.get("mode", "regression")
         tm   = r.get("final_test_metrics", {})
         vm   = r.get("final_val_metrics",  {})
@@ -756,20 +879,21 @@ class ResultsPanel(QWidget):
             source = "Test (held out)" if tm.get("predictions") else "Validation (monitored)"
 
             if not preds or not labels:
-                self._perf_clear("No prediction data — re-train to generate metrics.")
+                grp_thesis.setVisible(False)
+                tbl_perf.setRowCount(0)
+                grp_metrics.setTitle("Performance Evaluation (no data — re-train)")
                 return
 
             n = len(class_names) if class_names else (max(max(preds), max(labels)) + 1)
             m = _compute_cls_perf_metrics(preds, labels, n)
             acc = m["accuracy"]
 
-            # ── Thesis goal widget ────────────────────────────────────────
-            self.grp_thesis.setVisible(True)
-            self.grp_thesis.setTitle(
+            grp_thesis.setVisible(True)
+            grp_thesis.setTitle(
                 f"Thesis Goal  —  ≥ 70% correct prediction  ({source})"
             )
             pct = acc * 100
-            self.lbl_thesis_acc.setText(f"{pct:.1f}%")
+            lbl_acc.setText(f"{pct:.1f}%")
 
             if acc >= 0.70:
                 color      = "#1b5e20"
@@ -783,26 +907,15 @@ class ResultsPanel(QWidget):
                 gap        = (0.70 - acc) * 100
                 result_txt = f"✗  {gap:.1f} pp below the 70% target"
 
-            self.lbl_thesis_acc.setStyleSheet(
-                f"color:{color}; font-size:46px; font-weight:bold;"
+            lbl_acc.setStyleSheet(
+                f"color:{color}; font-size:{lbl_acc.font().pointSize()}px; font-weight:bold;"
             )
-            self.lbl_thesis_result.setText(result_txt)
-            self.lbl_thesis_result.setStyleSheet(
-                f"font-size:15px; font-weight:bold; color:{color};"
+            lbl_result.setText(result_txt)
+            lbl_result.setStyleSheet(
+                f"font-size:13px; font-weight:bold; color:{color};"
             )
 
-            # ── Metrics table ─────────────────────────────────────────────
-            self.grp_metrics_summary.setTitle(
-                f"Classification Metrics  ({source})"
-            )
-            _brief = {
-                "Accuracy":          "Correct predictions / total images",
-                "Balanced Accuracy": "Mean recall per class — robust to class imbalance",
-                "Cohen's Kappa":     "Agreement corrected for chance  (0=random, 1=perfect)",
-                "MCC":               "Correlation coeff. for multi-class  (−1 to +1)",
-                "Macro F1":          "Mean F1 per class — equal weight to all classes",
-                "Weighted F1":       "Mean F1 per class — weighted by class sample count",
-            }
+            grp_metrics.setTitle(f"Classification Metrics  ({source})")
             rows = [
                 ("Accuracy",          m["accuracy"],          self._rate_accuracy(m["accuracy"])),
                 ("Balanced Accuracy", m["balanced_accuracy"],  self._rate_accuracy(m["balanced_accuracy"])),
@@ -811,28 +924,30 @@ class ResultsPanel(QWidget):
                 ("Macro F1",          m["macro_f1"],           self._rate_f1(m["macro_f1"])),
                 ("Weighted F1",       m["weighted_f1"],        self._rate_f1(m["weighted_f1"])),
             ]
-            self.tbl_perf.setRowCount(len(rows))
+            tbl_perf.setRowCount(len(rows))
+            n_cols = tbl_perf.columnCount()
             for i, (name, val, (rating, bg)) in enumerate(rows):
                 cells = [
                     QTableWidgetItem(name),
                     QTableWidgetItem(f"{val:.4f}"),
                     QTableWidgetItem(rating),
-                    QTableWidgetItem(_brief.get(name, "")),
+                    QTableWidgetItem(_PERF_BRIEF.get(name, "")),
                 ]
-                for col, cell in enumerate(cells):
+                for col in range(min(n_cols, len(cells))):
+                    cell = cells[col]
                     cell.setTextAlignment(
                         Qt.AlignCenter if col < 3 else Qt.AlignLeft | Qt.AlignVCenter
                     )
                     if bg and col < 3:
                         cell.setBackground(QColor(bg))
-                    self.tbl_perf.setItem(i, col, cell)
+                    tbl_perf.setItem(i, col, cell)
 
         else:
             # ── Regression mode ───────────────────────────────────────────
-            self.grp_thesis.setVisible(False)
+            grp_thesis.setVisible(False)
             m_src  = tm if tm else vm
             source = "Test (held out)" if tm else "Validation (monitored)"
-            self.grp_metrics_summary.setTitle(f"Regression Metrics  ({source})")
+            grp_metrics.setTitle(f"Regression Metrics  ({source})")
 
             _reg_brief = {
                 "RMSE": "Root Mean Squared Error — avg prediction error in Pb% units (lower = better)",
@@ -847,7 +962,8 @@ class ResultsPanel(QWidget):
                             self._rate_r2(v)   if key == "r2"   else ("—", None))
                     rows_reg.append((name, v, rate))
 
-            self.tbl_perf.setRowCount(len(rows_reg))
+            tbl_perf.setRowCount(len(rows_reg))
+            n_cols = tbl_perf.columnCount()
             for i, (name, val, (rating, bg)) in enumerate(rows_reg):
                 cells = [
                     QTableWidgetItem(name),
@@ -855,13 +971,34 @@ class ResultsPanel(QWidget):
                     QTableWidgetItem(rating),
                     QTableWidgetItem(_reg_brief.get(name, "")),
                 ]
-                for col, cell in enumerate(cells):
+                for col in range(min(n_cols, len(cells))):
+                    cell = cells[col]
                     cell.setTextAlignment(
                         Qt.AlignCenter if col < 3 else Qt.AlignLeft | Qt.AlignVCenter
                     )
                     if bg and col < 3:
                         cell.setBackground(QColor(bg))
-                    self.tbl_perf.setItem(i, col, cell)
+                    tbl_perf.setItem(i, col, cell)
+
+    def _draw_performance_eval(self, r: dict):
+        """Fill the Performance Evaluation tab and the Overview tab for the selected run."""
+        # Main Performance Evaluation tab
+        self._fill_perf_widgets(
+            r,
+            self.grp_thesis, self.lbl_thesis_acc, self.lbl_thesis_result,
+            self.grp_metrics_summary, self.tbl_perf,
+        )
+        # Ensure big-number font is correct for main tab (46px)
+        self.lbl_thesis_acc.setFont(QFont("Arial", 46, QFont.Bold))
+
+        # Overview tab (mirror)
+        self._fill_perf_widgets(
+            r,
+            self.grp_thesis_combo, self.lbl_thesis_acc_combo, self.lbl_thesis_result_combo,
+            self.grp_metrics_combo, self.tbl_perf_combo,
+        )
+        # Smaller font for the compact combo header
+        self.lbl_thesis_acc_combo.setFont(QFont("Arial", 36, QFont.Bold))
 
     def _perf_clear(self, msg: str = ""):
         self.grp_thesis.setVisible(False)
@@ -869,6 +1006,10 @@ class ResultsPanel(QWidget):
         self.grp_metrics_summary.setTitle(
             f"Performance Evaluation  ({msg})" if msg else "Performance Evaluation"
         )
+        # Also clear Overview perf section
+        self.grp_thesis_combo.setVisible(False)
+        self.tbl_perf_combo.setRowCount(0)
+        self.grp_metrics_combo.setTitle("Classification Metrics")
 
     # ── Rating helpers ────────────────────────────────────────────────────
     @staticmethod
@@ -921,7 +1062,7 @@ class ResultsPanel(QWidget):
                           transform=self.ax_loss.transAxes, color="#aaa", fontsize=11)
         self.canvas_loss.draw()
 
-        # Confusion matrix
+        # Confusion matrix (main tab)
         self.fig_cm.clf()
         self.ax_cm = self.fig_cm.add_subplot(111)
         self.ax_cm.set_title("Confusion Matrix")
@@ -930,6 +1071,16 @@ class ResultsPanel(QWidget):
         self.canvas_cm.draw()
         self.tbl_cls_metrics.setRowCount(0)
         self.lbl_overall_metrics.setText("")
+
+        # Confusion matrix (Overview tab)
+        self.fig_cm_combo.clf()
+        self.ax_cm_combo = self.fig_cm_combo.add_subplot(111)
+        self.ax_cm_combo.set_title("Confusion Matrix")
+        self.ax_cm_combo.text(0.5, 0.5, "Select a run", ha="center", va="center",
+                              transform=self.ax_cm_combo.transAxes, color="#aaa", fontsize=11)
+        self.canvas_cm_combo.draw()
+        self.tbl_cls_metrics_combo.setRowCount(0)
+        self.lbl_overall_metrics_combo.setText("")
 
         # Performance evaluation
         self._perf_clear()
