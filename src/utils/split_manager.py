@@ -89,7 +89,7 @@ def load_split_file(path: str) -> dict:
     -------
     dict with keys ``name``, ``created``, ``splits``.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8-sig") as f:
         data = json.load(f)
 
     if "splits" in data:

@@ -29,7 +29,7 @@ def load_results(output_dir: str) -> list:
     pattern = os.path.join(output_dir, "**", "result.json")
     for path in sorted(_glob.glob(pattern, recursive=True)):
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, "r", encoding="utf-8-sig") as f:
                 results.append(json.load(f))
         except Exception:
             pass
