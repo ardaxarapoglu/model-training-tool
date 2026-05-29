@@ -1,4 +1,4 @@
-"""Main application window."""
+﻿"""Main application window."""
 import os
 
 from qtpy.QtWidgets import (

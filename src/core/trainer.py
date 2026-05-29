@@ -1,4 +1,4 @@
-"""QThread-based training worker.
+﻿"""QThread-based training worker.
 
 Validation split is monitored each epoch (early stopping / LR scheduling)
 but is NEVER used for weight updates.  Test split is evaluated exactly once
@@ -93,8 +93,7 @@ class TrainingWorker(QThread):
         arch_name       = resolved.get("architecture", "ResNet-50")
         pretrained      = bool(t_cfg.get("pretrained", True))
         # freeze_backbone / unfreeze_last_n / dropout_head are grid-searchable;
-        # read from resolved (which handles both the old scalar format and the
-        # new dict format introduced for grid search support).
+        # read from resolved (handles both old scalar format and new dict format).
         _fb = resolved.get("freeze_backbone", "True")
         freeze_backbone = str(_fb).strip().lower() in ("true", "1", "yes")
         unfreeze_last_n = int(float(resolved.get("unfreeze_last_n", 0)))
@@ -322,9 +321,8 @@ class TrainingWorker(QThread):
                     f"R²={final_test_metrics.get('r2', 0):.4f}"
                 )
 
-        # Build a compact snapshot of which time frames were in each split.
-        # This is saved to result.json so any run can be reproduced exactly,
-        # and the split can be reloaded later via Tools → Load Split.
+        # Compact snapshot of which time frames were in each split for this run.
+        # Saved to result.json so the exact split can be reloaded via Tools → Load Split.
         split_snapshot = {}
         for exp in experiments:
             exp_split = exp.get("split", "train")
@@ -351,7 +349,7 @@ class TrainingWorker(QThread):
             "n_train": len(train_samples),
             "n_val": len(val_samples),
             "n_test": len(test_samples),
-            "split_snapshot": split_snapshot,    # full per-TF split map; loadable via Tools → Load Split
+            "split_snapshot": split_snapshot,    # loadable via Tools → Load Split
         }
 
         # Explicitly release GPU tensors.  Python's cyclic GC may not run between
@@ -390,7 +388,6 @@ class TrainingWorker(QThread):
             "weight_decay":    pick("weight_decay",    "1e-4"),
             "loss":            pick("loss",             "MSE"),
             "architecture":    pick("architecture",     "ResNet-50"),
-            # grid-searchable transfer-learning params
             "freeze_backbone": pick("freeze_backbone", "True"),
             "unfreeze_last_n": pick("unfreeze_last_n", "0"),
             "dropout_head":    pick("dropout_head",    "0.5"),

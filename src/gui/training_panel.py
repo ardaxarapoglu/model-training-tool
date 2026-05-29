@@ -1,4 +1,4 @@
-"""Training panel: hyperparameters, grid-search, run/stop controls, live log."""
+﻿"""Training panel: hyperparameters, grid-search, run/stop controls, live log."""
 import os
 
 from qtpy.QtWidgets import (
@@ -724,9 +724,7 @@ class TrainingPanel(QWidget):
         # Architecture / transfer learning
         self.row_arch.set_entry(cfg.get("architecture", "ResNet-50"))
         self.chk_pretrained.setChecked(bool(cfg.get("pretrained", True)))
-        # freeze_backbone / unfreeze_last_n / dropout_head may be either an old
-        # scalar value (bool/int/float) or the new dict format for grid search.
-        # _ParamRow.set_entry handles both transparently.
+        # freeze/unfreeze/dropout accept both old scalar values and new dict format
         self.row_freeze.set_entry(cfg.get("freeze_backbone", "True"))
         self.row_unfreeze.set_entry(cfg.get("unfreeze_last_n", "0"))
         self.row_dropout.set_entry(cfg.get("dropout_head", "0.3"))

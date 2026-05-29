@@ -20,6 +20,12 @@ crashes/
 .venv/
 venv/
 
+# Local tooling & generated outputs
+.claude/
+generate_workflow.py
+heatmap.png
+pb_distribution.png
+
 # IDE
 .vscode/
 .idea/

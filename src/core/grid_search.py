@@ -1,4 +1,4 @@
-"""Grid search orchestration.  Produces all param combinations and runs them sequentially."""
+﻿"""Grid search orchestration.  Produces all param combinations and runs them sequentially."""
 import itertools
 import datetime
 from typing import List, Dict

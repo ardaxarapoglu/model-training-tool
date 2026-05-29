@@ -1,9 +1,9 @@
-{
+﻿{
   "experiments": [
     {
       "id": "D03",
       "name": "D03 - 03",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D03.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D03.xlsx",
       "experiment_no": "03",
       "date": "2026-03-15 00:00:00",
       "operator": "Arda - Burak",
@@ -13,7 +13,7 @@
         {
           "name": "Y1",
           "pb_concentration": 70.464,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D03\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y1",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -21,7 +21,7 @@
         {
           "name": "Y2",
           "pb_concentration": 70.908,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D03\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y2",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -29,7 +29,7 @@
         {
           "name": "Y3",
           "pb_concentration": 58.315,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D03\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y3",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -37,7 +37,7 @@
         {
           "name": "Y4",
           "pb_concentration": 15.717,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D03\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y4",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -45,7 +45,7 @@
         {
           "name": "Y5",
           "pb_concentration": 7.14,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D03\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y5",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -53,7 +53,7 @@
         {
           "name": "Y6",
           "pb_concentration": 1.745,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D03\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y6",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -61,7 +61,7 @@
         {
           "name": "Y7",
           "pb_concentration": 3.815,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D03\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D03\\Y7",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -71,7 +71,7 @@
     {
       "id": "D04",
       "name": "D04 - 04",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D04.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D04.xlsx",
       "experiment_no": "04",
       "date": "2026-03-09 00:00:00",
       "operator": "Arda - Burak",
@@ -81,49 +81,49 @@
         {
           "name": "Y1",
           "pb_concentration": 43.555,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y1",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 21.463,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y2",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 19.903,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y3",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 14.017,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y4",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.549,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y5",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 1.869,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y6",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.289,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D04\\Y7",
           "notes": "",
           "split": "train"
         }
@@ -132,7 +132,7 @@
     {
       "id": "D05",
       "name": "D05 - 05",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D05.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D05.xlsx",
       "experiment_no": "05",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
@@ -142,49 +142,49 @@
         {
           "name": "Y1",
           "pb_concentration": 39.58,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D05\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y1",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 30.426,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D05\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y2",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 16.035,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D05\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y3",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.429,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D05\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y4",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.465,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D05\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y5",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.566,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D05\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y6",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.544,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D05\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D05\\Y7",
           "notes": "",
           "split": "train"
         }
@@ -193,7 +193,7 @@
     {
       "id": "D06",
       "name": "D06 - 06",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D06.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D06.xlsx",
       "experiment_no": "06",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
@@ -203,49 +203,49 @@
         {
           "name": "Y1",
           "pb_concentration": 34.806,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D06\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y1",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 28.721,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D06\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y2",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 15.013,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D06\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y3",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.98,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D06\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y4",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 2.624,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D06\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y5",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 1.966,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D06\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y6",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.533,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D06\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D06\\Y7",
           "notes": "",
           "split": "train"
         }
@@ -254,7 +254,7 @@
     {
       "id": "D07",
       "name": "D07 - 07",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D07.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D07.xlsx",
       "experiment_no": "07",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
@@ -264,7 +264,7 @@
         {
           "name": "Y1",
           "pb_concentration": 39.831,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y1",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -272,15 +272,15 @@
         {
           "name": "Y2",
           "pb_concentration": 34.494,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y2",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 25.26,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y3",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -288,7 +288,7 @@
         {
           "name": "Y4",
           "pb_concentration": 16.204,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y4",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -296,7 +296,7 @@
         {
           "name": "Y5",
           "pb_concentration": 6.651,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y5",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -304,7 +304,7 @@
         {
           "name": "Y6",
           "pb_concentration": 2.514,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y6",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -312,7 +312,7 @@
         {
           "name": "Y7",
           "pb_concentration": 1.74,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D07\\Y7",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -322,7 +322,7 @@
     {
       "id": "D08",
       "name": "D08 - 08",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D08.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D08.xlsx",
       "experiment_no": "08",
       "date": "2026-03-16 00:00:00",
       "operator": "Arda - Burak",
@@ -332,7 +332,7 @@
         {
           "name": "Y1",
           "pb_concentration": 35.511,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D08\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y1",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -340,7 +340,7 @@
         {
           "name": "Y2",
           "pb_concentration": 32.906,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D08\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y2",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -348,15 +348,15 @@
         {
           "name": "Y3",
           "pb_concentration": 29.638,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D08\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y3",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 20.444,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D08\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y4",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -364,7 +364,7 @@
         {
           "name": "Y5",
           "pb_concentration": 5.642,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D08\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y5",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -372,7 +372,7 @@
         {
           "name": "Y6",
           "pb_concentration": 2.572,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D08\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y6",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -380,7 +380,7 @@
         {
           "name": "Y7",
           "pb_concentration": 1.792,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D08\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D08\\Y7",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -390,7 +390,7 @@
     {
       "id": "D09",
       "name": "D09 - 09",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D09.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D09.xlsx",
       "experiment_no": "09",
       "date": "2026-03-17 00:00:00",
       "operator": "Arda - Burak",
@@ -400,49 +400,49 @@
         {
           "name": "Y1",
           "pb_concentration": 34.884,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y1",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 22.904,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y2",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 19.59,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y3",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 13.306,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y4",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 6.018,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y5",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 3.42,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y6",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 2.879,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D09\\Y7",
           "notes": "",
           "split": "train"
         }
@@ -451,7 +451,7 @@
     {
       "id": "D10",
       "name": "D10 - 10",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D10.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D10.xlsx",
       "experiment_no": "10",
       "date": "2026-03-17 00:00:00",
       "operator": "Arda - Burak",
@@ -461,7 +461,7 @@
         {
           "name": "Y1",
           "pb_concentration": 57.696,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D10\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y1",
           "notes": "",
           "time_interval": "",
           "split": "validation"
@@ -469,7 +469,7 @@
         {
           "name": "Y2",
           "pb_concentration": 31.841,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D10\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y2",
           "notes": "",
           "time_interval": "",
           "split": "validation"
@@ -477,7 +477,7 @@
         {
           "name": "Y3",
           "pb_concentration": 17.167,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D10\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y3",
           "notes": "",
           "time_interval": "",
           "split": "validation"
@@ -485,7 +485,7 @@
         {
           "name": "Y4",
           "pb_concentration": 7.743,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D10\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y4",
           "notes": "",
           "time_interval": "",
           "split": "validation"
@@ -493,7 +493,7 @@
         {
           "name": "Y5",
           "pb_concentration": 3.581,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D10\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y5",
           "notes": "",
           "time_interval": "",
           "split": "validation"
@@ -501,7 +501,7 @@
         {
           "name": "Y6",
           "pb_concentration": 2.775,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D10\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y6",
           "notes": "",
           "time_interval": "",
           "split": "validation"
@@ -509,17 +509,17 @@
         {
           "name": "Y7",
           "pb_concentration": 1.702,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D10\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D10\\Y7",
           "notes": "",
           "time_interval": "",
-          "split": "train"
+          "split": "validation"
         }
       ]
     },
     {
       "id": "D11",
       "name": "D11 - 11",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D11.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D11.xlsx",
       "experiment_no": "11",
       "date": "2026-03-17 00:00:00",
       "operator": "Arda - Burak",
@@ -529,49 +529,49 @@
         {
           "name": "Y1",
           "pb_concentration": 45.156,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y1",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 33.175,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y2",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 14.524,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y3",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 8.774,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y4",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 4.327,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y5",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.894,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y6",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.968,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D11\\Y7",
           "notes": "",
           "split": "train"
         }
@@ -580,7 +580,7 @@
     {
       "id": "D12",
       "name": "D12 - 12",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D12.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D12.xlsx",
       "experiment_no": "12",
       "date": "2026-03-17 00:00:00",
       "operator": "Arda - Burak",
@@ -590,7 +590,7 @@
         {
           "name": "Y1",
           "pb_concentration": 50.259,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D12\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y1",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -598,7 +598,7 @@
         {
           "name": "Y2",
           "pb_concentration": 19.982,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D12\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y2",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -606,7 +606,7 @@
         {
           "name": "Y3",
           "pb_concentration": 7.897,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D12\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y3",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -614,7 +614,7 @@
         {
           "name": "Y4",
           "pb_concentration": 5.393,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D12\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y4",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -622,7 +622,7 @@
         {
           "name": "Y5",
           "pb_concentration": 3.929,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D12\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y5",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -630,7 +630,7 @@
         {
           "name": "Y6",
           "pb_concentration": 2.793,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D12\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y6",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -638,7 +638,7 @@
         {
           "name": "Y7",
           "pb_concentration": 1.704,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D12\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D12\\Y7",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -648,7 +648,7 @@
     {
       "id": "D13",
       "name": "D13 - 13",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D13.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D13.xlsx",
       "experiment_no": "13",
       "date": "2026-03-17 00:00:00",
       "operator": "Arda - Burak",
@@ -658,15 +658,15 @@
         {
           "name": "Y1",
           "pb_concentration": 62.141,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D13\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y1",
           "notes": "",
-          "split": "train",
+          "split": "excluded",
           "time_interval": ""
         },
         {
           "name": "Y2",
           "pb_concentration": 40.181,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D13\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y2",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -674,7 +674,7 @@
         {
           "name": "Y3",
           "pb_concentration": 15.067,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D13\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y3",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -682,7 +682,7 @@
         {
           "name": "Y4",
           "pb_concentration": 7.418,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D13\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y4",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -690,7 +690,7 @@
         {
           "name": "Y5",
           "pb_concentration": 3.917,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D13\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y5",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -698,7 +698,7 @@
         {
           "name": "Y6",
           "pb_concentration": 2.545,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D13\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y6",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -706,7 +706,7 @@
         {
           "name": "Y7",
           "pb_concentration": 1.744,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D13\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D13\\Y7",
           "notes": "",
           "split": "train",
           "time_interval": ""
@@ -716,7 +716,7 @@
     {
       "id": "D14",
       "name": "D14 - 14",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D14.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D14.xlsx",
       "experiment_no": "14",
       "date": "2026-03-18 00:00:00",
       "operator": "Arda - Burak",
@@ -726,7 +726,7 @@
         {
           "name": "Y1",
           "pb_concentration": 60.825,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D14\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y1",
           "notes": "",
           "time_interval": "",
           "split": "test"
@@ -734,7 +734,7 @@
         {
           "name": "Y2",
           "pb_concentration": 37.377,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D14\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y2",
           "notes": "",
           "time_interval": "",
           "split": "test"
@@ -742,7 +742,7 @@
         {
           "name": "Y3",
           "pb_concentration": 17.566,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D14\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y3",
           "notes": "",
           "time_interval": "",
           "split": "test"
@@ -750,7 +750,7 @@
         {
           "name": "Y4",
           "pb_concentration": 9.079,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D14\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y4",
           "notes": "",
           "time_interval": "",
           "split": "test"
@@ -758,7 +758,7 @@
         {
           "name": "Y5",
           "pb_concentration": 2.694,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D14\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y5",
           "notes": "",
           "time_interval": "",
           "split": "test"
@@ -766,7 +766,7 @@
         {
           "name": "Y6",
           "pb_concentration": 2.751,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D14\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y6",
           "notes": "",
           "time_interval": "",
           "split": "test"
@@ -774,7 +774,7 @@
         {
           "name": "Y7",
           "pb_concentration": 1.738,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D14\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D14\\Y7",
           "notes": "",
           "time_interval": "",
           "split": "test"
@@ -784,7 +784,7 @@
     {
       "id": "D15",
       "name": "D15 - 15",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D15.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D15.xlsx",
       "experiment_no": "15",
       "date": "2026-03-18 00:00:00",
       "operator": "Arda - Burak",
@@ -794,49 +794,49 @@
         {
           "name": "Y1",
           "pb_concentration": 51.748,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D15\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y1",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y2",
           "pb_concentration": 20.013,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D15\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y2",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y3",
           "pb_concentration": 9.897,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D15\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y3",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.686,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D15\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y4",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y5",
           "pb_concentration": 3.366,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D15\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y5",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y6",
           "pb_concentration": 3.355,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D15\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y6",
           "notes": "",
           "split": "train"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.873,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D15\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D15\\Y7",
           "notes": "",
           "split": "train"
         }
@@ -845,75 +845,75 @@
     {
       "id": "D16",
       "name": "D16 - 16",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D16.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D16.xlsx",
       "experiment_no": "16",
       "date": "2026-03-18 00:00:00",
       "operator": "Arda - Burak",
-      "split": "validation",
+      "split": "test",
       "notes": "",
       "time_frames": [
         {
           "name": "Y1",
           "pb_concentration": 45.257,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D16\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y1",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "test"
         },
         {
           "name": "Y2",
           "pb_concentration": 21.868,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D16\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y2",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "test"
         },
         {
           "name": "Y3",
           "pb_concentration": 8.421,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D16\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y3",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "test"
         },
         {
           "name": "Y4",
           "pb_concentration": 6.554,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D16\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y4",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "test"
         },
         {
           "name": "Y5",
           "pb_concentration": 2.945,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D16\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y5",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "test"
         },
         {
           "name": "Y6",
           "pb_concentration": 2.672,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D16\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y6",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "test"
         },
         {
           "name": "Y7",
           "pb_concentration": 1.869,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D16\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D16\\Y7",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "test"
         }
       ]
     },
     {
       "id": "D17",
       "name": "D17 - 17",
-      "form_path": "C:/Users/ardax/Desktop/model-training-tool\\forms\\D17.xlsx",
+      "form_path": "C:/Users/Arda/Desktop/model-training-tool\\forms\\D17.xlsx",
       "experiment_no": "17",
       "date": "2026-03-18 00:00:00",
       "operator": "Arda - Burak",
@@ -923,7 +923,7 @@
         {
           "name": "Y1",
           "pb_concentration": 46.649,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D17\\Y1",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y1",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -931,7 +931,7 @@
         {
           "name": "Y2",
           "pb_concentration": 19.029,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D17\\Y2",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y2",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -939,7 +939,7 @@
         {
           "name": "Y3",
           "pb_concentration": 9.196,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D17\\Y3",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y3",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -947,7 +947,7 @@
         {
           "name": "Y4",
           "pb_concentration": 4.397,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D17\\Y4",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y4",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -955,7 +955,7 @@
         {
           "name": "Y5",
           "pb_concentration": 2.523,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D17\\Y5",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y5",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -963,7 +963,7 @@
         {
           "name": "Y6",
           "pb_concentration": 2.043,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D17\\Y6",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y6",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -971,7 +971,7 @@
         {
           "name": "Y7",
           "pb_concentration": 2.336,
-          "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D17\\Y7",
+          "folder_path": "C:/Users/Arda/Desktop/model-training-tool\\frames\\D17\\Y7",
           "notes": "",
           "time_interval": "",
           "split": "train"
@@ -1098,8 +1098,8 @@
   },
   "training": {
     "architecture": {
-      "value": "EfficientNet-B3",
-      "values": "ResNet-101,EfficientNet-B3,MobileNet-V3-Large",
+      "value": "ResNet-50",
+      "values": "ResNet-18,ResNet-34,ResNet-50,ResNet-101,EfficientNet-B0,EfficientNet-B3,EfficientNet-B7,MobileNet-V2,MobileNet-V3-Small,MobileNet-V3-Large,DenseNet-121",
       "use_grid": true
     },
     "pretrained": true,
@@ -1127,12 +1127,12 @@
     "learning_rate": {
       "value": "0.0001",
       "values": "0.0001,0.00001",
-      "use_grid": false
+      "use_grid": true
     },
     "optimizer": {
       "value": "Adam",
       "values": "Adam,AdamW",
-      "use_grid": false
+      "use_grid": true
     },
     "weight_decay": {
       "value": "0.0001",
@@ -1155,7 +1155,7 @@
     },
     "early_stopping": {
       "enabled": true,
-      "patience": 10,
+      "patience": 20,
       "min_delta": 1e-05
     },
     "grid_search_enabled": true,
