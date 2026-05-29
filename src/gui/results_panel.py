@@ -143,73 +143,18 @@ class ResultsPanel(QWidget):
 
         # ══════════════════════════════════════════════════════════════════
         # Tab 0 — Performance Evaluation
-        # Layout:
-        #   Top strip  : Thesis goal  |  Summary metrics table
-        #   Bottom area: Confusion matrix  |  Per-class table
+        # Layout: Per-class metrics | Confusion matrix | Performance eval
         # ══════════════════════════════════════════════════════════════════
-        perf_w = QWidget()
-        perf_v = QVBoxLayout(perf_w)
-        perf_v.setContentsMargins(4, 4, 4, 4)
-        perf_v.setSpacing(4)
+        perf_w     = QWidget()
+        perf_outer = QVBoxLayout(perf_w)
+        perf_outer.setContentsMargins(4, 4, 4, 4)
 
-        # ── Top strip ─────────────────────────────────────────────────────
-        top_split = QSplitter(Qt.Horizontal)
-        top_split.setMaximumHeight(170)
+        h_split = QSplitter(Qt.Horizontal)
 
-        # Left of top: thesis goal (big accuracy number)
-        self.grp_thesis = QGroupBox("Accuracy  (≥ 70% target)")
-        thesis_h = QHBoxLayout(self.grp_thesis)
-        thesis_h.setSpacing(12)
-        self.lbl_thesis_acc = QLabel("—")
-        self.lbl_thesis_acc.setFont(QFont("Arial", 40, QFont.Bold))
-        self.lbl_thesis_acc.setAlignment(Qt.AlignCenter)
-        self.lbl_thesis_acc.setStyleSheet("color:#555;")
-        self.lbl_thesis_acc.setMinimumWidth(120)
-        thesis_h.addWidget(self.lbl_thesis_acc)
-        self.lbl_thesis_result = QLabel("Select a run to evaluate.")
-        self.lbl_thesis_result.setStyleSheet("font-size:13px; font-weight:bold; color:#555;")
-        self.lbl_thesis_result.setWordWrap(True)
-        thesis_h.addWidget(self.lbl_thesis_result, 1)
-        top_split.addWidget(self.grp_thesis)
-
-        # Right of top: summary metrics table
-        self.grp_metrics_summary = QGroupBox("Classification Metrics")
-        summary_v = QVBoxLayout(self.grp_metrics_summary)
-        summary_v.setContentsMargins(4, 4, 4, 4)
-        self.tbl_perf = QTableWidget(0, 4)
-        for col, (lbl, tip) in enumerate(_PERF_HDRS):
-            hi = QTableWidgetItem(lbl)
-            hi.setToolTip(tip)
-            self.tbl_perf.setHorizontalHeaderItem(col, hi)
-        self.tbl_perf.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.tbl_perf.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.tbl_perf.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.tbl_perf.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.tbl_perf.verticalHeader().setVisible(False)
-        self.tbl_perf.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.tbl_perf.setAlternatingRowColors(True)
-        summary_v.addWidget(self.tbl_perf)
-        top_split.addWidget(self.grp_metrics_summary)
-        top_split.setSizes([280, 520])
-        perf_v.addWidget(top_split)
-
-        # ── Bottom area ───────────────────────────────────────────────────
-        bottom_split = QSplitter(Qt.Horizontal)
-
-        # Left: confusion matrix figure
-        cm_w = QWidget()
-        cm_v = QVBoxLayout(cm_w)
-        cm_v.setContentsMargins(0, 0, 0, 0)
-        self.fig_cm    = Figure(figsize=(4, 4), tight_layout=True)
-        self.ax_cm     = self.fig_cm.add_subplot(111)
-        self.canvas_cm = FigureCanvas(self.fig_cm)
-        cm_v.addWidget(self.canvas_cm)
-        bottom_split.addWidget(cm_w)
-
-        # Right: per-class metrics table
+        # ── Panel 1: Per-class metrics ────────────────────────────────────
         cls_w = QWidget()
         cls_v = QVBoxLayout(cls_w)
-        cls_v.setContentsMargins(6, 2, 4, 4)
+        cls_v.setContentsMargins(4, 4, 4, 4)
         cls_v.setSpacing(4)
 
         cls_hdr = QLabel("Per-class Metrics")
@@ -234,9 +179,62 @@ class ResultsPanel(QWidget):
         self.lbl_overall_metrics.setWordWrap(True)
         cls_v.addWidget(self.lbl_overall_metrics)
 
-        bottom_split.addWidget(cls_w)
-        bottom_split.setSizes([430, 320])
-        perf_v.addWidget(bottom_split, 1)   # stretch=1 → fills remaining height
+        h_split.addWidget(cls_w)
+
+        # ── Panel 2: Confusion matrix ─────────────────────────────────────
+        cm_w = QWidget()
+        cm_v = QVBoxLayout(cm_w)
+        cm_v.setContentsMargins(0, 0, 0, 0)
+        self.fig_cm    = Figure(figsize=(4, 4), tight_layout=True)
+        self.ax_cm     = self.fig_cm.add_subplot(111)
+        self.canvas_cm = FigureCanvas(self.fig_cm)
+        cm_v.addWidget(self.canvas_cm)
+        h_split.addWidget(cm_w)
+
+        # ── Panel 3: Performance evaluation ──────────────────────────────
+        eval_w = QWidget()
+        eval_v = QVBoxLayout(eval_w)
+        eval_v.setContentsMargins(4, 4, 4, 4)
+        eval_v.setSpacing(6)
+
+        self.grp_thesis = QGroupBox("Accuracy  (≥ 70% target)")
+        thesis_h = QHBoxLayout(self.grp_thesis)
+        thesis_h.setSpacing(12)
+        self.lbl_thesis_acc = QLabel("—")
+        self.lbl_thesis_acc.setFont(QFont("Arial", 40, QFont.Bold))
+        self.lbl_thesis_acc.setAlignment(Qt.AlignCenter)
+        self.lbl_thesis_acc.setStyleSheet("color:#555;")
+        self.lbl_thesis_acc.setMinimumWidth(110)
+        thesis_h.addWidget(self.lbl_thesis_acc)
+        self.lbl_thesis_result = QLabel("Select a run to evaluate.")
+        self.lbl_thesis_result.setStyleSheet("font-size:13px; font-weight:bold; color:#555;")
+        self.lbl_thesis_result.setWordWrap(True)
+        thesis_h.addWidget(self.lbl_thesis_result, 1)
+        eval_v.addWidget(self.grp_thesis)
+
+        self.grp_metrics_summary = QGroupBox("Classification Metrics")
+        summary_v = QVBoxLayout(self.grp_metrics_summary)
+        summary_v.setContentsMargins(4, 4, 4, 4)
+        self.tbl_perf = QTableWidget(0, 4)
+        for col, (lbl, tip) in enumerate(_PERF_HDRS):
+            hi = QTableWidgetItem(lbl)
+            hi.setToolTip(tip)
+            self.tbl_perf.setHorizontalHeaderItem(col, hi)
+        self.tbl_perf.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.tbl_perf.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.tbl_perf.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.tbl_perf.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.tbl_perf.verticalHeader().setVisible(False)
+        self.tbl_perf.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tbl_perf.setAlternatingRowColors(True)
+        self.tbl_perf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        summary_v.addWidget(self.tbl_perf)
+        eval_v.addWidget(self.grp_metrics_summary, 1)
+
+        h_split.addWidget(eval_w)
+
+        h_split.setSizes([280, 400, 320])
+        perf_outer.addWidget(h_split)
 
         self.chart_tabs.addTab(perf_w, "Performance Evaluation")
 
