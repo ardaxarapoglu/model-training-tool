@@ -104,7 +104,7 @@
           "pb_concentration": 14.017,
           "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D04\\Y4",
           "notes": "",
-          "split": "train"
+          "split": "validation"
         },
         {
           "name": "Y5",
@@ -322,7 +322,7 @@
           "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D07\\Y7",
           "notes": "",
           "time_interval": "",
-          "split": "validation"
+          "split": "train"
         }
       ]
     },
@@ -449,7 +449,7 @@
           "pb_concentration": 3.42,
           "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D09\\Y6",
           "notes": "",
-          "split": "train",
+          "split": "validation",
           "time_interval": ""
         },
         {
@@ -580,7 +580,7 @@
           "pb_concentration": 2.894,
           "folder_path": "C:/Users/ardax/Desktop/model-training-tool\\frames\\D11\\Y6",
           "notes": "",
-          "split": "train"
+          "split": "validation"
         },
         {
           "name": "Y7",
