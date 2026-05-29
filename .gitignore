@@ -1,0 +1,27 @@
+# Large data folders — not uploaded to GitHub
+results/
+forms/
+frames/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Model checkpoints
+*.pt
+*.pth
+
+# Crash reports
+crashes/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
